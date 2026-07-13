@@ -17,17 +17,19 @@ echo "Gateway : $GATEWAY"
 echo "DNS     : $LOCAL_DNS"
 
 echo "--- 2. Crear archivos de vars para Helper-Scripts: ---"
-
+DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 create_vars() {
     local APP="$1"
     local HOSTNAME="$2"
-    local IP="$3"
-    local CPU="$4"
-    local RAM="$5"
-    local DISK="$6"
-    local TUN="$7"
-    local GPU="$8"
-    local NEST="$9"
+    local OS="$3"
+    local OSV="$4"
+    local IP="$5"
+    local CPU="$6"
+    local RAM="$7"
+    local DISK="$8"
+    local TUN="$9"
+    local GPU="$10"
+    local NEST="$11"
 
     cat >"/usr/local/community-scripts/defaults/${HOSTNAME}.vars" <<EOF
 # App-specific defaults for $APP ($HOSTNAME)
@@ -64,12 +66,12 @@ EOF
 echo "--- 2.1. Adguard test ---"
 #Encabezados de create_vars:
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
-create_vars "AdGuard" "adguard" "$ADGUARD_IP" 1 512 2 yes no 0
+create_vars "AdGuard" "adguard" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
 
 echo "--- 2.1 Creando los archivos de configuracion.vars ---"
-#create_vars "AdGuard" "adguard" "$ADGUARD_IP" 1 512 2 yes no 0
-#create_vars "Frigate" "frigate" "$FRIGATE_IP" 4 4096 32 yes yes 1
-#create_vars "Cloudflared" "cloudflared" "$CLOUDFLARED_IP" 1 512 4 yes no 0
+#create_vars "AdGuard" "adguard" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
+#create_vars "Frigate" "frigate" "debian" "13" "$FRIGATE_IP" 4 4096 32 yes yes 1
+#create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 
 echo
 echo "Contenido de adguard_test.vars:"
