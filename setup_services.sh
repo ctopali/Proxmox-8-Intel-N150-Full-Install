@@ -61,12 +61,18 @@ var_hostname=$HOSTNAME
 var_template_storage=local
 var_container_storage=local-lvm
 EOF
+
+echo
+echo "Contenido de adguard_test.vars:"
+echo "--------------------------------"
+cat /usr/local/community-scripts/defaults/${HOSTNAME}.vars
+rm /usr/local/community-scripts/defaults/${HOSTNAME}.vars
 }
 
 echo "--- 2.1. Adguard test ---"
 #Encabezados de create_vars:
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
-create_vars "AdGuard" "adguard_test" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
+create_vars "AdGuard" "adguard_test" "debian" "13" "$ADGUARD_IP_TEST" 1 512 2 yes no 0
 
 echo "--- 2.1 Creando los archivos de configuracion.vars ---"
 #create_vars "AdGuard" "adguard" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
@@ -77,7 +83,3 @@ echo
 echo "Contenido de adguard_test.vars:"
 echo "--------------------------------"
 
-cat /usr/local/community-scripts/defaults/adguard_test.vars
-#lo borro y verifico que no existe, solo me interesa crear bien el archivo en este minuto
-rm /usr/local/community-scripts/defaults/adguard_test.vars
-cat /usr/local/community-scripts/defaults/adguard_test.vars
