@@ -41,7 +41,7 @@ var_unprivileged=1
 var_cpu=$CPU
 var_ram=$RAM
 var_disk=$DISK
-var_brg=vmbr0
+var_brg=$BRIDGE
 var_net=$IP/24
 var_gateway=$GATEWAY
 var_ipv6_method=auto
@@ -66,7 +66,7 @@ EOF
 echo "--- 2.1. Adguard test ---"
 #Encabezados de create_vars:
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
-create_vars "AdGuard" "adguard" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
+create_vars "AdGuard" "adguard_test" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
 
 echo "--- 2.1 Creando los archivos de configuracion.vars ---"
 #create_vars "AdGuard" "adguard" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
