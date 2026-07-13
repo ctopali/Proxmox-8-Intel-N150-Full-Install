@@ -27,3 +27,5 @@ echo "Contenido de adguard_test.vars:"
 echo "--------------------------------"
 
 cat /usr/local/community-scripts/defaults/adguard_test.vars
+rm /usr/local/community-scripts/defaults/adguard_test.vars
+cat /usr/local/community-scripts/defaults/adguard_test.vars
