@@ -13,11 +13,11 @@ curl -fsSL \
 source /scripts/infra.conf
 
 echo "Infraestructura cargada."
-echo "Gateway  : $GATEWAY"
-echo "DNS      : $LOCAL_DNS"
-echo "Netmask  : $NETMASK"
-echo "TimeZone : $TIMEZONE"
-echo "Bridge   : $BRIDGE"
+echo "Gateway       : $GATEWAY"
+echo "DNS (Adguard) : $LOCAL_DNS"
+echo "Netmask       : $NETMASK"
+echo "TimeZone      : $TIMEZONE"
+echo "Bridge        : $BRIDGE"
 
 echo "--- 2. Crear archivos de vars para Helper-Scripts: ---"
 DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
