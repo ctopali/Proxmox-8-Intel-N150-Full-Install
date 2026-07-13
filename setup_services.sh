@@ -77,6 +77,21 @@ echo "--- 2.1. Adguard test ---"
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 create_vars "AdGuard" "adguard_test" "debian" "13" "$ADGUARD_IP_TEST" 1 512 2 yes no 0
 
+echo "--- 2.2. Cloudflared ---"
+# Instalacion de Debian 13 limpia:
+
+# Add cloudflare gpg key
+mkdir -p --mode=0755 /usr/share/keyrings
+curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg | tee /usr/share/keyrings/cloudflare-public-v2.gpg >/dev/null
+
+# Add this repo to your apt repositories
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
+
+# install cloudflared
+apt-get update && apt-get install cloudflared
+
+# Entramos a Cloudflare -> Networks -> Connectors
+
 #echo "--- 2.1 Creando los archivos de configuracion.vars ---"
 #create_vars "AdGuard" "adguard" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
 #create_vars "Frigate" "frigate" "debian" "13" "$FRIGATE_IP" 4 4096 32 yes yes 1
