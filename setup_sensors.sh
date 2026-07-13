@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -e
 
 # Script de automatización de sensores para Proxmox (Chip ITE IT8613E)
 # Autor: Gemini para Camilo
