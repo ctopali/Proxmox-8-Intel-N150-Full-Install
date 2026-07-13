@@ -13,11 +13,11 @@ curl -fsSL \
 source /scripts/infra.conf
 
 echo "Infraestructura cargada."
+echo "Bridge        : $BRIDGE"
 echo "Gateway       : $GATEWAY"
 echo "DNS (Adguard) : $LOCAL_DNS"
 echo "Netmask       : $NETMASK"
 echo "TimeZone      : $TIMEZONE"
-echo "Bridge        : $BRIDGE"
 
 echo "--- 2. Crear archivos de vars para Helper-Scripts: ---"
 DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -77,12 +77,7 @@ echo "--- 2.1. Adguard test ---"
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 create_vars "AdGuard" "adguard_test" "debian" "13" "$ADGUARD_IP_TEST" 1 512 2 yes no 0
 
-echo "--- 2.1 Creando los archivos de configuracion.vars ---"
+#echo "--- 2.1 Creando los archivos de configuracion.vars ---"
 #create_vars "AdGuard" "adguard" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
 #create_vars "Frigate" "frigate" "debian" "13" "$FRIGATE_IP" 4 4096 32 yes yes 1
 #create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
-
-echo
-echo "Contenido de adguard_test.vars:"
-echo "--------------------------------"
-
