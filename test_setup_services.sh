@@ -73,6 +73,10 @@ rm /usr/local/community-scripts/defaults/${HOSTNAME}.vars
 }
 
 echo "--- 2.1. Adguard test ---"
+
+# IPs test
+ADGUARD_IP_TEST="192.168.1.19"
+
 Encabezados de create_vars:
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 create_vars "AdGuard" "adguard_test" "debian" "13" "$ADGUARD_IP_TEST" 1 512 2 yes no 0
