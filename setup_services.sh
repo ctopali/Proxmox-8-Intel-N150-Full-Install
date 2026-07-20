@@ -19,7 +19,7 @@ echo "DNS (Adguard) : $LOCAL_DNS"
 echo "Netmask       : $NETMASK"
 echo "TimeZone      : $TIMEZONE"
 
-echo "--- 2. Crear archivos de vars para Helper-Scripts: ---"
+echo "--- 2. Crear archivos de vars para Helper-Scripts o Contenedores: ---"
 DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 create_vars() {
     local APP="$1"
