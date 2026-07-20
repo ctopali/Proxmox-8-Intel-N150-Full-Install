@@ -35,41 +35,41 @@ create_vars() {
     local NEST="$11"
 
     cat >"/usr/local/community-scripts/defaults/${HOSTNAME}.vars" <<EOF
-# App-specific defaults for $APP ($HOSTNAME)
-# Generated on $DATE
-
-var_os=$OS
-var_version=$OSV
-var_unprivileged=1
-var_cpu=$CPU
-var_ram=$RAM
-var_disk=$DISK
-var_brg=$BRIDGE
-var_net=$IP/$NETMASK
-var_gateway=$GATEWAY
-var_ipv6_method=auto
-var_ssh=no
-var_apt_cacher=no
-var_fuse=no
-var_tun=$TUN
-var_gpu=$GPU
-var_nesting=$NEST
-var_keyctl=1
-var_mknod=0
-var_protection=no
-var_timezone=$TIMEZONE
-var_tags=
-var_verbose=yes
-var_hostname=$HOSTNAME
-var_template_storage=local
-var_container_storage=local-lvm
-EOF
-
-echo
-echo "Contenido de adguard_test.vars:"
-echo "--------------------------------"
-cat /usr/local/community-scripts/defaults/${HOSTNAME}.vars
-rm /usr/local/community-scripts/defaults/${HOSTNAME}.vars
+    # App-specific defaults for $APP ($HOSTNAME)
+    # Generated on $DATE
+    
+    var_os=$OS
+    var_version=$OSV
+    var_unprivileged=1
+    var_cpu=$CPU
+    var_ram=$RAM
+    var_disk=$DISK
+    var_brg=$BRIDGE
+    var_net=$IP/$NETMASK
+    var_gateway=$GATEWAY
+    var_ipv6_method=auto
+    var_ssh=no
+    var_apt_cacher=no
+    var_fuse=no
+    var_tun=$TUN
+    var_gpu=$GPU
+    var_nesting=$NEST
+    var_keyctl=1
+    var_mknod=0
+    var_protection=no
+    var_timezone=$TIMEZONE
+    var_tags=
+    var_verbose=yes
+    var_hostname=$HOSTNAME
+    var_template_storage=local
+    var_container_storage=local-lvm
+    EOF
+    
+    echo
+    echo "Contenido de adguard_test.vars:"
+    echo "--------------------------------"
+    cat /usr/local/community-scripts/defaults/${HOSTNAME}.vars
+    rm /usr/local/community-scripts/defaults/${HOSTNAME}.vars
 }
 
 echo "--- 2.1. Adguard test ---"
