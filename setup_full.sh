@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+source /scripts/infra.conf
+source /scripts/setup_services.sh
+#source /scripts/lib.sh
+
 inst-script() {
     local SCRIPT="$1"
     local PREGUNTA="$2"
