@@ -1,26 +1,32 @@
 #!/usr/bin/env bash
 set -e
 
-#creamos el directorio de configuracion de los helper script si no existe
-mkdir -p /usr/local/community-scripts/defaults
+check_infra() {
+    local required_vars=(
+        BRIDGE
+        GATEWAY
+        LOCAL_DNS
+        NETMASK
+        TIMEZONE
+    )
 
-echo "--- 1. Descargando infraestructura de red ---"
+    for var in "${required_vars[@]}"; do
+        [[ -n "${!var:-}" ]] || {
+            echo "ERROR: setup_services.sh requiere que primero se haga:"
+            echo "  source /scripts/infra.conf"
+            echo "Variable faltante: $var"
+            return 1
+        }
+    done
 
-curl -fsSL \
-"https://raw.githubusercontent.com/ctopali/Proxmox-8-Intel-N150-Full-Install/refs/heads/main/infra.conf" \
--o /scripts/infra.conf
+    echo "Infraestructura cargada."
+    echo "Bridge        : $BRIDGE"
+    echo "Gateway       : $GATEWAY"
+    echo "DNS (AdGuard) : $LOCAL_DNS"
+    echo "Netmask       : $NETMASK"
+    echo "TimeZone      : $TIMEZONE"
+}
 
-source /scripts/infra.conf
-
-echo "Infraestructura cargada."
-echo "Bridge        : $BRIDGE"
-echo "Gateway       : $GATEWAY"
-echo "DNS (Adguard) : $LOCAL_DNS"
-echo "Netmask       : $NETMASK"
-echo "TimeZone      : $TIMEZONE"
-
-echo "--- 2. Crear archivos de vars para Helper-Scripts o Contenedores: ---"
-DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 create_vars() {
     local APP="$1"
     local HOSTNAME="$2"
@@ -31,42 +37,72 @@ create_vars() {
     local RAM="$7"
     local DISK="$8"
     local TUN="$9"
-    local GPU="$10"
-    local NEST="$11"
+    local GPU="${10}"
+    local NEST="${11}"
 
-    cat >"/usr/local/community-scripts/defaults/${HOSTNAME}.vars" <<EOF
-    # App-specific defaults for $APP ($HOSTNAME)
-    # Generated on $DATE
+    # Validación de parámetros obligatorios
+    local PARAMS=(
+        APP
+        HOSTNAME
+        OS
+        OSV
+        IP
+        CPU
+        RAM
+        DISK
+        TUN
+        GPU
+        NEST
+    )
+
+    for param in "${PARAMS[@]}"; do
+        if [[ -z "${!param}" ]]; then
+            echo "ERROR: Falta el parámetro obligatorio: $param"
+            echo
+            echo "Uso:"
+            echo "create_vars APP HOSTNAME OS OS_VERSION IP CPU RAM DISK TUN GPU NEST"
+            return 1
+        fi
+    done
     
-    var_os=$OS
-    var_version=$OSV
-    var_unprivileged=1
-    var_cpu=$CPU
-    var_ram=$RAM
-    var_disk=$DISK
-    var_brg=$BRIDGE
-    var_net=$IP/$NETMASK
-    var_gateway=$GATEWAY
-    var_ipv6_method=auto
-    var_ssh=no
-    var_apt_cacher=no
-    var_fuse=no
-    var_tun=$TUN
-    var_gpu=$GPU
-    var_nesting=$NEST
-    var_keyctl=1
-    var_mknod=0
-    var_protection=no
-    var_timezone=$TIMEZONE
-    var_tags=
-    var_verbose=yes
-    var_hostname=$HOSTNAME
-    var_template_storage=local
-    var_container_storage=local-lvm
-    EOF
-    
-    echo
-    echo "Contenido de $HOSTNAME.vars:"
-    echo "--------------------------------"
-    cat /usr/local/community-scripts/defaults/${HOSTNAME}.vars
+    local DATE
+    DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local VARS_FILE="/usr/local/community-scripts/defaults/${HOSTNAME}.vars"
+
+    #creamos el directorio de configuracion de los helper script si no existe
+    mkdir -p /usr/local/community-scripts/defaults
+
+    cat >"$VARS_FILE" <<EOF
+# App-specific defaults for $APP ($HOSTNAME)
+# Generated on $DATE
+
+var_os=$OS
+var_version=$OSV
+var_unprivileged=1
+var_cpu=$CPU
+var_ram=$RAM
+var_disk=$DISK
+var_brg=$BRIDGE
+var_net=$IP/$NETMASK
+var_gateway=$GATEWAY
+var_ipv6_method=auto
+var_ssh=no
+var_apt_cacher=no
+var_fuse=no
+var_tun=$TUN
+var_gpu=$GPU
+var_nesting=$NEST
+var_keyctl=1
+var_mknod=0
+var_protection=no
+var_timezone=$TIMEZONE
+var_tags=
+var_verbose=yes
+var_hostname=$HOSTNAME
+var_template_storage=local
+var_container_storage=local-lvm
+EOF
+
+echo
+echo "Archivo creado: $VARS_FILE"
 }
