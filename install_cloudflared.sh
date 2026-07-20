@@ -9,7 +9,7 @@ echo "Creando archivo vars: ---"
 create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 
 # Instalacion de Debian 13 limpia:
-create_lxc_from_vars() 120 /usr/local/community-scripts/defaults/cloudflared.vars
+create_lxc_from_vars 120 /usr/local/community-scripts/defaults/cloudflared.vars
 
 pct set 120 --onboot 1
 echo "A continuación debe aparecer: onboot: 1"
