@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+source /scripts/infra.conf
+source /scripts/lib.sh
+
 echo "Creando archivo vars: ---"
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
