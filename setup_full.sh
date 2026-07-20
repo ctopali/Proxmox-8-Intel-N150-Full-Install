@@ -5,55 +5,60 @@ source /scripts/infra.conf
 source /scripts/setup_services.sh
 #source /scripts/lib.sh
 
-inst-script() {
-    local SCRIPT="$1"
-    local PREGUNTA="$2"
+SCRIPTS[1]="setup_sensors.sh|Instalar sensores y drivers IT87"
+SCRIPTS[2]="install_haos.sh|Instalar Home Assistant OS (VM)"
+SCRIPTS[3]="install_adguard.sh|Instalar AdGuard Home (LXC)"
+SCRIPTS[4]="install_cloudflared.sh|Instalar Cloudflared (LXC)"
+SCRIPTS[5]="install_frigate.sh|Instalar Frigate (LXC)"
+
+while true; do
 
     echo
-    read -rp "$PREGUNTA [y/N]: " RESP
+    echo "======================================"
+    echo "       INSTALADOR PROXMOX"
+    echo "======================================"
 
-    case "${RESP,,}" in
-        y|yes|s|si|sí)
-            echo "Continuando..."
+    for i in $(printf "%s\n" "${!SCRIPTS[@]}" | sort -n); do
+        
+        IFS="|" read -r SCRIPT DESC <<< "${SCRIPTS[$i]}"
 
-            if [[ -f "/scripts/$SCRIPT" ]]; then
-                echo "$SCRIPT ya está descargado."
-            else
-                echo "Descargando $SCRIPT..."
-                curl -fsSL \
-                    "https://raw.githubusercontent.com/ctopali/Proxmox-8-Intel-N150-Full-Install/refs/heads/main/$SCRIPT" \
-                    -o "/scripts/$SCRIPT"
-            fi
+        echo "$i) $DESC"
+    done
 
-            echo "Ejecutando $SCRIPT..."
-            bash "/scripts/$SCRIPT"
+    MAX_OPTION=$(printf "%s\n" "${!SCRIPTS[@]}" | sort -n | tail -1)
+
+    echo
+    echo "0) Salir"
+    echo
+
+    read -rp "Seleccione una opción [0-$MAX_OPTION]: " OPTION
+
+    case "$OPTION" in
+
+        0)
+            echo "Saliendo..."
+            exit 0
             ;;
 
         *)
-            echo "Se omitió $SCRIPT."
-            return 0
+            if [[ -n "${SCRIPTS[$OPTION]}" ]]; then
+
+                IFS="|" read -r SCRIPT DESC <<< "${SCRIPTS[$OPTION]}"
+
+                echo
+                echo "Ejecutando:"
+                echo "$DESC"
+                echo
+
+                inst-script \
+                    "$SCRIPT" \
+                    "¿Desea ejecutar: $DESC?"
+
+            else
+                echo "Opción inválida."
+            fi
             ;;
+
     esac
-}
 
-echo "1. Instalar sensores y drivers de la MB IT87 (si aplica):"
-inst-script \
-    "setup_sensors.sh" \
-    "¿Desea instalar los controladores y sensores de la Tarjeta Madre IT87?"
-
-echo "2. Instalar Home Assistant (VM):"
-inst-script \
-    "setup_sensors.sh" \
-    "¿Desea instalar los controladores y sensores de la Tarjeta Madre IT87?"
-
-curl -fsSL \
-"https://raw.githubusercontent.com/ctopali/Proxmox-8-Intel-N150-Full-Install/refs/heads/main/setup_startup.sh" \
--o /scripts/setup_startup.sh
-echo "1.3. Script de setup_startup... CHECK"
-
-echo "2. Ejecucuion de Scripts y comandos bash:"
-echo "2.1 Ejecutando setup_sesors.sh:"
-bash /scripts/setup_sensors.sh
-
-echo "2.2 Ejecutando setup_services.sh:"
-bash /scripts/setup_services.sh
+done
