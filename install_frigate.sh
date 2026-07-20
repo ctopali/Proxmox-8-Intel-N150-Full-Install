@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+echo "Creando archivo vars: ---"
+#           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 echo "Creación del archivo frigate.vars..."
 create_vars "Frigate" "frigate" "debian" "13" "$FRIGATE_IP" 4 4096 32 yes yes 1
 
