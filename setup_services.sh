@@ -1,6 +1,37 @@
 #!/usr/bin/env bash
 set -e
 
+inst-script() {
+    local SCRIPT="$1"
+    local PREGUNTA="$2"
+
+    echo
+    read -rp "$PREGUNTA [y/N]: " RESP
+
+    case "${RESP,,}" in
+        y|yes|s|si|sí)
+            echo "Continuando..."
+
+            if [[ -f "/scripts/$SCRIPT" ]]; then
+                echo "$SCRIPT ya está descargado."
+            else
+                echo "Descargando $SCRIPT..."
+                curl -fsSL \
+                    "https://raw.githubusercontent.com/ctopali/Proxmox-8-Intel-N150-Full-Install/refs/heads/main/$SCRIPT" \
+                    -o "/scripts/$SCRIPT"
+            fi
+
+            echo "Ejecutando $SCRIPT..."
+            bash "/scripts/$SCRIPT"
+            ;;
+
+        *)
+            echo "Se omitió $SCRIPT."
+            return 0
+            ;;
+    esac
+}
+
 check_infra() {
     local required_vars=(
         BRIDGE
