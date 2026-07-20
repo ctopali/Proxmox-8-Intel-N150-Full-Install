@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# version
+services_version="0.1"
+
 inst-script() {
     local SCRIPT="$1"
     local PREGUNTA="$2"
