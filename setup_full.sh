@@ -110,6 +110,7 @@ SCRIPTS[2]="install_haos.sh|Instalar Home Assistant OS (VM)"
 SCRIPTS[3]="install_adguard.sh|Instalar AdGuard Home (LXC)"
 SCRIPTS[4]="install_cloudflared.sh|Instalar Cloudflared (LXC)"
 SCRIPTS[5]="install_frigate.sh|Instalar Frigate (LXC)"
+SCRIPTS[99]="setup_startup.sh|Ordena el orden de Inicio de LXC y VMs"
 
 while true; do
 
