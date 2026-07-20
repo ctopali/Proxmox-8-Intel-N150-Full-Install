@@ -1,14 +1,7 @@
-echo "--- 2.1 Creando los archivos de configuracion.vars ---"
+echo "Creando archivo vars: ---"
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
-#create_vars "AdGuard" "adguard" "debian" "13" "$ADGUARD_IP" 1 512 2 yes no 0
-#create_vars "Frigate" "frigate" "debian" "13" "$FRIGATE_IP" 4 4096 32 yes yes 1
 create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 
-echo "--- 2.2. AdGuard ---"
-
-echo "--- 2.3. Frigate ---"
-
-echo "--- 2.4. Cloudflared ---"
 # Instalacion de Debian 13 limpia:
 create_lxc_from_vars() 120 /usr/local/community-scripts/defaults/cloudflared.vars
 
