@@ -53,21 +53,17 @@ download_if_needed() {
     rm -f "$REMOTE_TMP"
 }
 
-
 echo "--- Verificando archivos base ---"
-
 
 download_if_needed \
     "infra.conf" \
     "INFRA_VERSION" \
     "Infraestructura"
 
-
 download_if_needed \
     "setup_services.sh" \
     "SERVICES_VERSION" \
     "Servicios"
-
 
 echo "--- Cargando configuración ---"
 
