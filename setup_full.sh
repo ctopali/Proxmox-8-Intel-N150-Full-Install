@@ -72,6 +72,10 @@ source /scripts/setup_services.sh
 
 check_infra
 
+#####################################################
+# Agregar las opciones aquí de scripts automatizados:
+#####################################################
+
 SCRIPTS[1]="setup_sensors.sh|Instalar sensores y drivers IT87"
 SCRIPTS[2]="install_haos.sh|Instalar Home Assistant OS (VM)"
 SCRIPTS[3]="install_adguard.sh|Instalar AdGuard Home (LXC)"
