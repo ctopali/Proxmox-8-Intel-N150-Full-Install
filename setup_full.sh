@@ -14,19 +14,22 @@ download_if_needed() {
 
     local LOCAL_FILE="$SCRIPTS_DIR/$FILE"
 
-    # Descargar siempre si no existe
+    # Descargar si no existe
     if [[ ! -f "$LOCAL_FILE" ]]; then
         echo "$FILE no existe. Descargando..."
         curl -fsSL "$REPO_URL/$FILE" -o "$LOCAL_FILE"
-        return
+        return 0
     fi
 
 
     # Obtener versión local
-    LOCAL_VERSION=$(grep "^$VERSION_VAR=" "$LOCAL_FILE" | cut -d'"' -f2)
+    local LOCAL_VERSION
+    LOCAL_VERSION=$(grep "^$VERSION_VAR=" "$LOCAL_FILE" \
+        | sed -E 's/.*="?([^"]+)"?.*/\1/')
 
 
-    # Obtener versión remota temporal
+    # Descargar versión remota temporal
+    local REMOTE_TMP
     REMOTE_TMP=$(mktemp)
 
     curl -fsSL \
@@ -34,19 +37,45 @@ download_if_needed() {
         -o "$REMOTE_TMP"
 
 
-    REMOTE_VERSION=$(grep "^$VERSION_VAR=" "$REMOTE_TMP" | cut -d'"' -f2)
+    # Obtener versión remota
+    local REMOTE_VERSION
+    REMOTE_VERSION=$(grep "^$VERSION_VAR=" "$REMOTE_TMP" \
+        | sed -E 's/.*="?([^"]+)"?.*/\1/')
 
 
+    # Validación de versión
+    if [[ -z "$REMOTE_VERSION" ]]; then
+        echo "ERROR: El archivo remoto $FILE no tiene $VERSION_VAR"
+        rm -f "$REMOTE_TMP"
+        return 1
+    fi
+
+
+    # Archivo local sin versión
+    if [[ -z "$LOCAL_VERSION" ]]; then
+        echo "$FILE no tiene versión local."
+        echo "Instalando versión $REMOTE_VERSION"
+
+        cp "$REMOTE_TMP" "$LOCAL_FILE"
+        rm -f "$REMOTE_TMP"
+        return 0
+    fi
+
+
+    # Comparación
     if [[ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]]; then
 
-        echo "Actualizando $FILE"
-        echo "Versión local : $LOCAL_VERSION"
-        echo "Versión nueva : $REMOTE_VERSION"
+        echo "Actualizando $VERSION_NAME"
+        echo "Archivo       : $FILE"
+        echo "Versión local  : $LOCAL_VERSION"
+        echo "Versión nueva  : $REMOTE_VERSION"
 
         cp "$REMOTE_TMP" "$LOCAL_FILE"
 
     else
+
         echo "$FILE actualizado ($LOCAL_VERSION)"
+
     fi
 
 
@@ -72,9 +101,9 @@ source /scripts/setup_services.sh
 
 check_infra
 
-#####################################################
-# Agregar las opciones aquí de scripts automatizados:
-#####################################################
+#######################################################
+# Agregar las opciones aquí de scripts automatizados: #
+#######################################################
 
 SCRIPTS[1]="setup_sensors.sh|Instalar sensores y drivers IT87"
 SCRIPTS[2]="install_haos.sh|Instalar Home Assistant OS (VM)"
