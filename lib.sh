@@ -143,20 +143,44 @@ echo "Archivo creado: $VARS_FILE"
 
 create_lxc_from_vars() {
 
-    local VMID=$1
-    local VARS=$2
+    local CTID="$1"
+    local VARS="$2"
 
     source "$VARS"
 
-    pct create "$VMID" \
-        local:vztmpl/${var_os}-${var_version}-standard_*.tar.zst \
+    echo "Buscando template Debian 13..."
+
+    TEMPLATE=$(find /var/lib/vz/template/cache \
+        -maxdepth 1 \
+        -type f \
+        -name "debian-13-standard*.tar.zst" \
+        | sort -V \
+        | tail -n1)
+
+
+    if [[ -z "$TEMPLATE" ]]; then
+        echo "ERROR: No existe un template Debian 13."
+        echo
+        echo "Templates disponibles:"
+        ls -lh /var/lib/vz/template/cache
+        exit 1
+    fi
+
+
+    TEMPLATE_NAME=$(basename "$TEMPLATE")
+
+    echo "Template seleccionado:"
+    echo "$TEMPLATE_NAME"
+
+
+    pct create "$CTID" \
+        "local:vztmpl/$TEMPLATE_NAME" \
         --hostname "$var_hostname" \
         --cores "$var_cpu" \
         --memory "$var_ram" \
-        --rootfs ${var_container_storage}:${var_disk} \
-        --net0 name=eth0,bridge=${var_brg},ip=${var_net},gw=${var_gateway} \
+        --rootfs "$var_container_storage:$var_disk" \
+        --net0 "name=eth0,bridge=$var_brg,ip=$var_net,gw=$var_gateway" \
         --unprivileged "$var_unprivileged" \
-        --features nesting=${var_nesting},keyctl=${var_keyctl}
+        --features "nesting=$var_nesting,keyctl=$var_keyctl"
 
-    pct start "$VMID"
 }
