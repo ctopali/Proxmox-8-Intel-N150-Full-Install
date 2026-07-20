@@ -73,13 +73,13 @@ rm /usr/local/community-scripts/defaults/${HOSTNAME}.vars
 }
 
 echo "--- 2.1. Adguard test ---"
-#Encabezados de create_vars:
+Encabezados de create_vars:
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 create_vars "AdGuard" "adguard_test" "debian" "13" "$ADGUARD_IP_TEST" 1 512 2 yes no 0
 
 echo "--- 2.2. Cloudflared ---"
 # Instalacion de Debian 13 limpia:
-
+# Chatgpt cambia esta línea por una instalación debian 13 usando el bash con este formato: create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 # Add cloudflare gpg key
 mkdir -p --mode=0755 /usr/share/keyrings
 curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg | tee /usr/share/keyrings/cloudflare-public-v2.gpg >/dev/null
@@ -88,7 +88,7 @@ curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg | tee /usr/share/
 echo 'deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
 
 # install cloudflared
-apt-get update && apt-get install cloudflared
+apt-get update && apt-get install cloudflared -y
 
 # Entramos a Cloudflare -> Networks -> Connectors
 
