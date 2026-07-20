@@ -106,3 +106,23 @@ EOF
 echo
 echo "Archivo creado: $VARS_FILE"
 }
+
+create_lxc_from_vars() {
+
+    local VMID=$1
+    local VARS=$2
+
+    source "$VARS"
+
+    pct create "$VMID" \
+        local:vztmpl/${var_os}-${var_version}-standard_*.tar.zst \
+        --hostname "$var_hostname" \
+        --cores "$var_cpu" \
+        --memory "$var_ram" \
+        --rootfs ${var_container_storage}:${var_disk} \
+        --net0 name=eth0,bridge=${var_brg},ip=${var_net},gw=${var_gateway} \
+        --unprivileged "$var_unprivileged" \
+        --features nesting=${var_nesting},keyctl=${var_keyctl}
+
+    pct start "$VMID"
+}
