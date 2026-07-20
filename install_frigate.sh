@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+source /scripts/infra.conf
+source /scripts/lib.sh
+
 echo "Creando archivo vars: ---"
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 echo "Creación del archivo frigate.vars..."
