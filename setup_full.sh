@@ -90,14 +90,14 @@ download_if_needed \
     "Infraestructura"
 
 download_if_needed \
-    "setup_services.sh" \
-    "SERVICES_VERSION" \
-    "Servicios"
+    "lib.sh" \
+    "LIB_VERSION" \
+    "Libreria"
 
 echo "--- Cargando configuración ---"
 
 source /scripts/infra.conf
-source /scripts/setup_services.sh
+source /scripts/lib.sh
 
 check_infra
 
