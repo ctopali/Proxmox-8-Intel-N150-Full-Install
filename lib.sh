@@ -2,7 +2,7 @@
 set -e
 
 # version
-SERVICES_VERSION="0.1"
+LIB_VERSION="0.1"
 
 inst-script() {
     local SCRIPT="$1"
