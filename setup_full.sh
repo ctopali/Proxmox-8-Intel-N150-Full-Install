@@ -74,7 +74,7 @@ download_if_needed() {
 
     else
 
-        echo "$FILE actualizado ($LOCAL_VERSION)"
+        echo "$FILE versión verificada ($LOCAL_VERSION)"
 
     fi
 
