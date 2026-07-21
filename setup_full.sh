@@ -106,10 +106,11 @@ check_infra
 #######################################################
 
 SCRIPTS[1]="setup_sensors.sh|Instalar sensores y drivers IT87"
-SCRIPTS[2]="install_haos.sh|Instalar Home Assistant OS (VM)"
-SCRIPTS[3]="install_adguard.sh|Instalar AdGuard Home (LXC)"
-SCRIPTS[4]="install_cloudflared.sh|Instalar Cloudflared (LXC)"
-SCRIPTS[5]="install_frigate.sh|Instalar Frigate (LXC)"
+SCRIPTS[2]="setup_disks.sh|Instala y Modifica Disco ZFS 'frigate_mirror'"
+SCRIPTS[3]="install_haos.sh|Instalar Home Assistant OS (VM)"
+SCRIPTS[4]="install_adguard.sh|Instalar AdGuard Home (LXC)"
+SCRIPTS[5]="install_cloudflared.sh|Instalar Cloudflared (LXC)"
+SCRIPTS[6]="install_frigate.sh|Instalar Frigate (LXC)"
 SCRIPTS[9]="setup_startup.sh|Ordena el orden de Inicio de LXC y VMs"
 
 while true; do
