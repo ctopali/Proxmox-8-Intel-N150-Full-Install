@@ -9,9 +9,7 @@ echo " Revisando discos"
 echo "========================================"
 
 command -v zpool >/dev/null || {
-    echo "ERROR: zpool no está instalado."
-    echo "Debes crear el zfs 'frigate_mirror' primero:"
-    echo "Navega: pve -> 
+    echo "ERROR: Las herramientas ZFS no están instaladas."
     exit 1
 }
 
@@ -45,9 +43,14 @@ zpool status
 
 echo
 
-if ! zpool list | grep -q "^${POOL}"; then
+if ! zpool list -H -o name | grep -Fxq "${POOL}"; then
     echo "ERROR:"
     echo "No existe el pool ${POOL}"
+    echo "Debes crear el zfs 'frigate_mirror' primero:"
+    echo "Navega: pve -> Diks -> ZFS -> Create: ZFS"
+    echo "Name: frigate_mirror; RAID Level: Mirror"
+    echo "Compression: lz4; ashift: 12"
+    echo "y seleccionar dos discos y click en 'Create'"
     exit 1
 fi
 
@@ -87,7 +90,7 @@ create_dataset clips
 create_dataset snapshots
 create_dataset exports
 
-# Limitamos los archivos de recordings a 1MB para que sea rapido
+# Recordsize de 1 MiB recomendado para grabaciones secuenciales
 if zfs list -H -o name "${POOL}/recordings" >/dev/null 2>&1; then
     zfs set recordsize=1M "${POOL}/recordings"
 fi
@@ -101,9 +104,10 @@ echo "========================================"
 FRIGATE_UID=0
 FRIGATE_GID=0
 
-chown -R ${FRIGATE_UID}:${FRIGATE_GID} "${MOUNT}"
-chmod -R 755 "${MOUNT}"
-
+if [ -d "${MOUNT}" ]; then
+    chown -R "${FRIGATE_UID}:${FRIGATE_GID}" "${MOUNT}"
+    chmod -R 755 "${MOUNT}"
+fi
 echo
 echo "========================================"
 echo " Información Post-Modificaciones"
