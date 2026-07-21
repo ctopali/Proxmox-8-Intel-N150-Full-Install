@@ -121,6 +121,16 @@ echo "Punto de montaje:"
 df -h "${MOUNT}"
 
 echo
+echo "Propiedades del pool:"
+zfs get \
+    compression,atime,relatime,xattr,acltype,aclinherit,dnodesize,mountpoint \
+    "${POOL}"
+
+echo
+echo "Propiedades del dataset recordings:"
+zfs get recordsize "${POOL}/recordings"
+
+echo
 echo "========================================"
 echo " Finalizado"
 echo "========================================"
