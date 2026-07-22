@@ -11,7 +11,7 @@ VARS_FILE="/usr/local/community-scripts/defaults/cloudflared.vars"
 echo "Creando archivo vars..."
 
 #           APP          HOSTNAME       IP                  CPU RAM DISK TUN GPU NEST
-create_vars "Cloudflared" "cloudflared" "debian" "12" "$CLOUDFLARED_IP" 1 512 4 yes no 0
+create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 
 echo "Verificando que el LXC ID $CTID está Libre."
 if pct status "$CTID" &>/dev/null; then
@@ -19,7 +19,7 @@ if pct status "$CTID" &>/dev/null; then
     exit 1
 fi
 
-echo "Instalando Debian 12 limpio..."
+echo "Instalando Debian 13 limpio..."
 
 create_lxc_from_vars "$CTID" "$VARS_FILE"
 
@@ -30,6 +30,12 @@ echo "Configuración del contenedor:"
 pct config "$CTID"
 
 pct start "$CTID"
+
+echo "Esperando inicio del contenedor..."
+
+until pct exec "$CTID" -- hostname &>/dev/null; do
+    sleep 2
+done
 
 echo
 echo "Instalando Cloudflared..."
@@ -104,13 +110,23 @@ echo
 echo "Token válido detectado (${#TOKEN} caracteres)."
 
 
-pct exec "$CTID" -- \
-cloudflared service install "$TOKEN"
+pct exec "$CTID" -- cloudflared service install "$TOKEN"
 
-pct exec "$CTID" -- systemctl status cloudflared --no-pager
+echo "Verificando servicio Cloudflared..."
+
+pct exec "$CTID" -- systemctl enable cloudflared
+
+pct exec "$CTID" -- systemctl restart cloudflared
+
+pct exec "$CTID" -- systemctl is-active --quiet cloudflared || {
+    echo "ERROR: Cloudflared no inició correctamente"
+    pct exec "$CTID" -- journalctl -u cloudflared -n 50 --no-pager
+    exit 1
+}
 
 echo
 echo "=============================================="
-echo "Cloudflared instalado correctamente."
+echo " Cloudflared instalado correctamente"
+echo " CTID: $CTID"
+echo " IP: $CLOUDFLARED_IP"
 echo "=============================================="
-echo
