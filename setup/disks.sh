@@ -95,6 +95,11 @@ if zfs list -H -o name "${POOL}/recordings" >/dev/null 2>&1; then
     zfs set recordsize=1M "${POOL}/recordings"
 fi
 
+echo
+echo "========================================"
+echo " Dejando quota del Disco en 95%"
+echo "========================================"
+
 set_zfs_quota_percent_total() {
 
     local DATASET="$1"
@@ -138,6 +143,7 @@ set_zfs_quota_percent_total() {
 }
 
 set_zfs_quota_percent_total frigate_mirror 95
+
 echo
 echo "========================================"
 echo " Permisos Frigate LXC"
