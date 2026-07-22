@@ -5,7 +5,7 @@ META|SETUP_VERSION|0.1b
 CORE|infra.conf||
 CORE|lib.sh||
 
-MENU|setup/sensors.sh|1|Instalar sensores y drivers IT87
+MENU|setup/sensors_it87.sh|1|Instalar sensores y drivers IT87
 MENU|setup/disks.sh|2|Instala y modifica disco ZFS 'frigate_mirror'
 
 MENU|install/haos.sh|3|Instalar Home Assistant OS (VM)
