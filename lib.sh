@@ -138,6 +138,31 @@ echo
 echo "Archivo creado: $VARS_FILE"
 }
 
+# Obtiene CTID por hostname del contenedor LXC
+# Uso:
+# CTID=$(get_ctid_by_hostname "adguard")
+
+get_ctid_by_hostname() {
+
+    local HOSTNAME="$1"
+
+    if [[ -z "$HOSTNAME" ]]; then
+        echo "ERROR: Debe indicar un hostname."
+        return 1
+    fi
+
+    local CTID
+
+    CTID=$(pct list | awk -v host="$HOSTNAME" 'NR>1 && $3==host {print $1}')
+
+    if [[ -z "$CTID" ]]; then
+        echo "ERROR: No se encontró el contenedor: $HOSTNAME" >&2
+        return 1
+    fi
+
+    echo "$CTID"
+}
+
 create_lxc_from_vars() {
 
     local CTID="$1"
