@@ -20,10 +20,14 @@ REMOTE_SETUP_VERSION=$(get_remote_setup_version)
 update_project() {
     local TMP_LIST
     TMP_LIST=$(mktemp)
+    echo "Descargando setup_full.sh..."
+    curl -fsSL \
+        "$REPO_URL/setup_full.sh" \
+        -o "$SCRIPTS_DIR/setup_full.sh"
     echo "Descargando lista de archivos..."
-    curl -fsSL "$REPO_URL/files.list" -o "$TMP_LIST"
-    while IFS= read -r FILE; do
-        [[ -z "$FILE" || "$FILE" =~ ^# ]] && continue
+    curl -fsSL "$REPO_URL/manifest.list" -o "$TMP_LIST"
+    while IFS='|' read -r TYPE FILE MENU DESC; do
+        [[ -z "$TYPE" || "$TYPE" =~ ^# ]] && continue
         echo "Descargando $FILE..."
         mkdir -p "$SCRIPTS_DIR/$(dirname "$FILE")"
         curl -fsSL \
@@ -58,17 +62,16 @@ source "$SCRIPTS_DIR/lib.sh"
 
 check_infra
 
-#######################################################
-# Agregar las opciones aquí de scripts automatizados: #
-#######################################################
+declare -A SCRIPTS
 
-SCRIPTS[1]="setup/setup_sensors.sh|Instalar sensores y drivers IT87"
-SCRIPTS[2]="setup/setup_disks.sh|Instala y Modifica Disco ZFS 'frigate_mirror'"
-SCRIPTS[3]="install/install_haos.sh|Instalar Home Assistant OS (VM)"
-SCRIPTS[4]="install/install_adguard.sh|Instalar AdGuard Home (LXC)"
-SCRIPTS[5]="install/install_cloudflared.sh|Instalar Cloudflared (LXC)"
-SCRIPTS[6]="install/install_frigate.sh|Instalar Frigate (LXC)"
-SCRIPTS[9]="setup/setup_startup.sh|Ordena el orden de Inicio de LXC y VMs"
+while IFS='|' read -r TYPE FILE MENU DESC; do
+
+    [[ -z "$TYPE" || "$TYPE" =~ ^# ]] && continue
+    [[ "$TYPE" != "MENU" ]] && continue
+
+    SCRIPTS["$MENU"]="$FILE|$DESC"
+
+done < "$SCRIPTS_DIR/project.list"
 
 while true; do
 
