@@ -11,6 +11,8 @@ REPO_URL="https://raw.githubusercontent.com/ctopali/Proxmox-8-Intel-N150-Full-In
 MANIFEST_LOCAL="$SCRIPTS_DIR/manifest.list"
 MANIFEST_REMOTE="$(mktemp)"
 
+SCRIPT_PATH="$(readlink -f "$0" 2>/dev/null || echo "")"
+
 mkdir -p "$SCRIPTS_DIR"
 
 #############################################
@@ -108,6 +110,18 @@ check_updates() {
 
 }
 
+run_local_setup() {
+
+    if [[ "$SCRIPT_PATH" != "$SCRIPTS_DIR/setup_full.sh" ]] && [[ -f "$SCRIPTS_DIR/setup_full.sh" ]]; then
+
+        echo
+        echo "Ejecutando instalador local..."
+        exec bash "$SCRIPTS_DIR/setup_full.sh"
+
+    fi
+
+}
+
 load_menu() {
 
     declare -gA SCRIPTS
@@ -188,6 +202,8 @@ menu_loop() {
 ensure_project
 
 check_updates
+
+run_local_setup
 
 echo "--- Cargando configuración ---"
 
