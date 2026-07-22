@@ -18,12 +18,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/Proxmo
 
 echo "Cambiando el puerto de AdGuard Home al 81..."
 
-CTID=$(pct list | awk 'NR>1 && $3=="adguard" {print $1}')
-
-if [[ -z "$CTID" ]]; then
-    echo "No se encontró el contenedor adguard."
-    exit 1
-fi
+CTID=get_ctid_by_hostname adguard
 
 if pct exec $CTID -- grep -q "address: 0.0.0.0:80" /opt/AdGuardHome/AdGuardHome.yaml; then
     pct exec $CTID -- sed -i \
