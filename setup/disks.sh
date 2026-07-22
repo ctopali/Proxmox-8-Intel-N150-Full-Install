@@ -97,17 +97,16 @@ fi
 
 echo
 echo "========================================"
-echo " Permisos"
+echo " Permisos Frigate LXC"
 echo "========================================"
 
-# Aqui podemos configurar un usuario para frigate (si es que queremos agregar alguno aparte del root) y pueda escribir en el pool
-FRIGATE_UID=0
-FRIGATE_GID=0
+# Aqui podemos configurar un usuario para frigate (si es que queremos agregar
+# alguno aparte del root) y pueda escribir en el pool
+# LXC 102 unprivileged:
+# root del contenedor = UID/GID 100000 en el host
+chown -R 100000:100000 "${MOUNT}"
+chmod -R 755 "${MOUNT}"
 
-if [ -d "${MOUNT}" ]; then
-    chown -R "${FRIGATE_UID}:${FRIGATE_GID}" "${MOUNT}"
-    chmod -R 755 "${MOUNT}"
-fi
 echo
 echo "========================================"
 echo " Información Post-Modificaciones"
