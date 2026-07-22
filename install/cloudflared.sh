@@ -4,19 +4,21 @@ set -e
 source /scripts/infra.conf
 source /scripts/lib.sh
 
+CTID="7"
+
 echo "Creando archivo vars: ---"
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 
 # Instalacion de Debian 13 limpia:
-create_lxc_from_vars 120 /usr/local/community-scripts/defaults/cloudflared.vars
+create_lxc_from_vars $CTID /usr/local/community-scripts/defaults/cloudflared.vars
 
-pct set 120 --onboot 1
+pct set $CTID --onboot 1
 echo "A continuación debe aparecer: onboot: 1"
-pct config 120
-pct start 120
+pct config $CTID
+pct start $CTID
 
-pct exec 120 -- bash -c '
+pct exec $CTID -- bash -c '
 # Add cloudflare gpg key
 mkdir -p --mode=0755 /usr/share/keyrings
 curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg \
@@ -42,7 +44,7 @@ read -rp "> " INPUT
 TOKEN=$(awk '{print $NF}' <<< "$INPUT")
 
 # Validar longitud mínima
-if [[ ${#TOKEN} -lt 80 ]]; then
+if [[ ${#TOKEN} -lt 60 ]]; then
     echo
     echo "ERROR: No parece ser un token válido."
     echo "Token detectado: $TOKEN"
@@ -50,6 +52,6 @@ if [[ ${#TOKEN} -lt 80 ]]; then
     exit 1
 fi
 
-echo "Token válido detectado (${#TOKEN} caracteres)."
+echo "Token aparentemente válido detectado (${#TOKEN} caracteres)."
 
-pct exec 120 -- cloudflared service install "$TOKEN"
+pct exec $CTID -- cloudflared service install "$TOKEN"
