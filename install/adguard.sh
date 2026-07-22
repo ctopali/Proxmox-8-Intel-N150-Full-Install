@@ -15,3 +15,24 @@ echo
 echo "Ejecutando Instalación de Adguard Home: ---"
 read -rp "Press Enter to continue..."
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/adguard.sh)"
+
+echo "Cambiando el puerto de AdGuard Home al 81..."
+
+CTID=$(pct list | awk 'NR>1 && $3=="adguard" {print $1}')
+
+if [[ -z "$CTID" ]]; then
+    echo "No se encontró el contenedor adguard."
+    exit 1
+fi
+
+if pct exec $CTID -- grep -q "address: 0.0.0.0:80" /opt/AdGuardHome/AdGuardHome.yaml; then
+    pct exec $CTID -- sed -i \
+    's/address: 0\.0\.0\.0:80/address: 0.0.0.0:81/' \
+    /opt/AdGuardHome/AdGuardHome.yaml
+
+    pct exec $CTID -- systemctl restart AdGuardHome
+
+    echo "Puerto cambiado correctamente."
+else
+    echo "AdGuard Home ya no utiliza el puerto 80 o la configuración es distinta."
+fi
