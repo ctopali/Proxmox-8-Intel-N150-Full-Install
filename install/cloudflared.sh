@@ -13,6 +13,12 @@ echo "Creando archivo vars..."
 #           APP          HOSTNAME       IP                  CPU RAM DISK TUN GPU NEST
 create_vars "Cloudflared" "cloudflared" "debian" "12" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 
+echo "Verificando que el LXC ID $CTID está Libre."
+if pct status "$CTID" &>/dev/null; then
+    echo "El CT $CTID ya existe."
+    exit 1
+fi
+
 echo "Instalando Debian 12 limpio..."
 
 create_lxc_from_vars "$CTID" "$VARS_FILE"
