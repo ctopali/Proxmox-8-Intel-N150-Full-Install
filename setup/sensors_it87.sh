@@ -9,7 +9,12 @@ set -e
 
 echo "--- 1. Actualizando Repositorios e Instalando Dependencias ---"
 apt update
-apt install -y git build-essential dkms pve-headers lm-sensors fancontrol
+apt install -y \
+    build-essential \
+    dkms \
+    fancontrol \
+    lm-sensors \
+    "pve-headers-$(uname -r)"
 
 echo "--- 2. Configurando GRUB (acpi_enforce_resources=lax) ---"
 # Verifica si el parámetro ya existe para no duplicarlo
