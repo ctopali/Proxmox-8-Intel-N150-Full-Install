@@ -4,7 +4,7 @@ set -e
 source /scripts/infra.conf
 source /scripts/lib.sh
 
-CTID="101"
+CTID="$CT_CLOUDFLARED"
 
 echo "Creando archivo vars..."
 
@@ -67,7 +67,7 @@ echo " -> Seleccionar túnel"
 echo " -> Add a Connector"
 echo " -> Debian 64-bit"
 echo
-echo "Copie el comando completo mostrado por Cloudflare."
+echo "Copie el segundo text box mostrado por Cloudflare."
 echo
 
 
