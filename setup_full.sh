@@ -1,61 +1,193 @@
 #!/usr/bin/env bash
 set -e
 
-SETUP_VERSION="0.1b"
+#############################################
+# Configuración
+#############################################
 
 SCRIPTS_DIR="/scripts"
 REPO_URL="https://raw.githubusercontent.com/ctopali/Proxmox-8-Intel-N150-Full-Install/refs/heads/main"
 
+MANIFEST_LOCAL="$SCRIPTS_DIR/manifest.list"
+MANIFEST_REMOTE="$(mktemp)"
+
 mkdir -p "$SCRIPTS_DIR"
 
-get_remote_setup_version() {
-    curl -fsSL "$REPO_URL/setup_full.sh" \
-    | grep '^SETUP_VERSION=' \
-    | sed -E 's/.*="?([^"]+)"?.*/\1/'
+#############################################
+# Funciones
+#############################################
+
+download_manifest() {
+
+    curl -fsSL \
+        "$REPO_URL/manifest.list" \
+        -o "$1"
+
 }
 
-LOCAL_SETUP_VERSION="$SETUP_VERSION"
-REMOTE_SETUP_VERSION=$(get_remote_setup_version)
+get_manifest_version() {
+
+    grep '^META|SETUP_VERSION|' "$1" | cut -d'|' -f3
+
+}
 
 update_project() {
-    local TMP_LIST
-    TMP_LIST=$(mktemp)
+
+    echo
+    echo "Actualizando proyecto..."
+    echo
+
     echo "Descargando setup_full.sh..."
     curl -fsSL \
         "$REPO_URL/setup_full.sh" \
         -o "$SCRIPTS_DIR/setup_full.sh"
+
     echo "Descargando manifest.list..."
-    curl -fsSL \
-        "$REPO_URL/manifest.list" \
-        -o "$SCRIPTS_DIR/manifest.list"
+    download_manifest "$MANIFEST_LOCAL"
+
     while IFS='|' read -r TYPE FILE MENU DESC; do
+
         [[ -z "$TYPE" || "$TYPE" =~ ^# ]] && continue
+        [[ "$TYPE" == "META" ]] && continue
+
         echo "Descargando $FILE..."
+
         mkdir -p "$SCRIPTS_DIR/$(dirname "$FILE")"
+
         curl -fsSL \
             "$REPO_URL/$FILE" \
             -o "$SCRIPTS_DIR/$FILE"
-    done < "$TMP_LIST"
-    rm -f "$TMP_LIST"
+
+    done < "$MANIFEST_LOCAL"
+
     echo
-    echo "Proyecto actualizado correctamente."
+    echo "Proyecto actualizado."
+
 }
 
-if [[ ! -f "$SCRIPTS_DIR/manifest.list" ]]; then
-    echo "Primera ejecución. Descargando archivos del proyecto..."
-    update_project
-fi
+ensure_project() {
 
-if [[ "$LOCAL_SETUP_VERSION" != "$REMOTE_SETUP_VERSION" ]]; then
-    echo
-    read -rp "Hay una nueva versión disponible ($REMOTE_SETUP_VERSION). ¿Actualizar el proyecto completo? [y/N]: " RESP
-    if [[ "$RESP" =~ ^([Yy]|[Yy][Ee][Ss]|[Ss][Ii]|[Ss][Íí])$ ]]; then
+    if [[ ! -f "$MANIFEST_LOCAL" ]]; then
+
+        echo "Primera ejecución."
+
         update_project
+
         echo
         echo "Reiniciando instalador..."
         exec bash "$SCRIPTS_DIR/setup_full.sh"
+
     fi
-fi
+
+}
+
+check_updates() {
+
+    download_manifest "$MANIFEST_REMOTE"
+
+    LOCAL_VERSION=$(get_manifest_version "$MANIFEST_LOCAL")
+    REMOTE_VERSION=$(get_manifest_version "$MANIFEST_REMOTE")
+
+    rm -f "$MANIFEST_REMOTE"
+
+    [[ "$LOCAL_VERSION" == "$REMOTE_VERSION" ]] && return
+
+    echo
+    read -rp "Hay una nueva versión disponible ($REMOTE_VERSION). ¿Actualizar el proyecto? [y/N]: " RESP
+
+    if [[ "$RESP" =~ ^([Yy]|[Yy][Ee][Ss]|[Ss][Ii]|[Ss][Íí])$ ]]; then
+
+        update_project
+
+        echo
+        echo "Reiniciando instalador..."
+
+        exec bash "$SCRIPTS_DIR/setup_full.sh"
+
+    fi
+
+}
+
+load_menu() {
+
+    declare -gA SCRIPTS
+
+    while IFS='|' read -r TYPE FILE MENU DESC; do
+
+        [[ "$TYPE" != "MENU" ]] && continue
+
+        SCRIPTS["$MENU"]="$FILE|$DESC"
+
+    done < "$MANIFEST_LOCAL"
+
+}
+
+menu_loop() {
+
+    while true; do
+
+        echo
+        echo "======================================"
+        echo "       INSTALADOR PROXMOX"
+        echo "======================================"
+
+        for i in $(printf "%s\n" "${!SCRIPTS[@]}" | sort -n); do
+
+            IFS="|" read -r SCRIPT DESC <<< "${SCRIPTS[$i]}"
+
+            echo "$i) $DESC"
+
+        done
+
+        MAX_OPTION=$(printf "%s\n" "${!SCRIPTS[@]}" | sort -n | tail -1)
+
+        echo
+        echo "0) Salir"
+        echo
+
+        read -rp "Seleccione una opción [0-$MAX_OPTION]: " OPTION
+
+        case "$OPTION" in
+
+            0)
+                echo "Saliendo..."
+                exit 0
+                ;;
+
+            *)
+                if [[ -n "${SCRIPTS[$OPTION]}" ]]; then
+
+                    IFS="|" read -r SCRIPT DESC <<< "${SCRIPTS[$OPTION]}"
+
+                    echo
+                    echo "Ejecutando:"
+                    echo "$DESC"
+                    echo
+
+                    inst-script \
+                        "$SCRIPT" \
+                        "¿Desea ejecutar: $DESC?"
+
+                else
+
+                    echo "Opción inválida."
+
+                fi
+                ;;
+
+        esac
+
+    done
+
+}
+
+#############################################
+# Main
+#############################################
+
+ensure_project
+
+check_updates
 
 echo "--- Cargando configuración ---"
 
@@ -64,65 +196,6 @@ source "$SCRIPTS_DIR/lib.sh"
 
 check_infra
 
-declare -A SCRIPTS
+load_menu
 
-while IFS='|' read -r TYPE FILE MENU DESC; do
-
-    [[ -z "$TYPE" || "$TYPE" =~ ^# ]] && continue
-    [[ "$TYPE" != "MENU" ]] && continue
-
-    SCRIPTS["$MENU"]="$FILE|$DESC"
-
-done < "$SCRIPTS_DIR/manifest.list"
-
-while true; do
-
-    echo
-    echo "======================================"
-    echo "       INSTALADOR PROXMOX"
-    echo "======================================"
-
-    for i in $(printf "%s\n" "${!SCRIPTS[@]}" | sort -n); do
-        
-        IFS="|" read -r SCRIPT DESC <<< "${SCRIPTS[$i]}"
-
-        echo "$i) $DESC"
-    done
-
-    MAX_OPTION=$(printf "%s\n" "${!SCRIPTS[@]}" | sort -n | tail -1)
-
-    echo
-    echo "0) Salir"
-    echo
-
-    read -rp "Seleccione una opción [0-$MAX_OPTION]: " OPTION
-
-    case "$OPTION" in
-
-        0)
-            echo "Saliendo..."
-            exit 0
-            ;;
-
-        *)
-            if [[ -n "${SCRIPTS[$OPTION]}" ]]; then
-
-                IFS="|" read -r SCRIPT DESC <<< "${SCRIPTS[$OPTION]}"
-
-                echo
-                echo "Ejecutando:"
-                echo "$DESC"
-                echo
-
-                inst-script \
-                    "$SCRIPT" \
-                    "¿Desea ejecutar: $DESC?"
-
-            else
-                echo "Opción inválida."
-            fi
-            ;;
-
-    esac
-
-done
+menu_loop
