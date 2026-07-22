@@ -56,9 +56,22 @@ update_project() {
 
         mkdir -p "$SCRIPTS_DIR/$(dirname "$FILE")"
 
-        curl -fsSL \
+        if ! curl -fsSL \
             "$REPO_URL/$FILE" \
-            -o "$SCRIPTS_DIR/$FILE"
+            -o "$SCRIPTS_DIR/$FILE"; then
+
+            echo
+            echo "ERROR: No fue posible descargar '$FILE'."
+            echo "El proyecto quedó incompleto."
+            echo "Hable con el admin del script y pidale que"
+            echo "Corrija el archivo manifest.list del repositorio."
+            echo "Una vez resuelto vuelva a ejecutar el instalador."
+
+            rm -f "$MANIFEST_LOCAL"
+
+            exit 1
+
+        fi
 
     done < "$MANIFEST_LOCAL"
 
