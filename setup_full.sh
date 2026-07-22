@@ -24,8 +24,10 @@ update_project() {
     curl -fsSL \
         "$REPO_URL/setup_full.sh" \
         -o "$SCRIPTS_DIR/setup_full.sh"
-    echo "Descargando lista de archivos..."
-    curl -fsSL "$REPO_URL/manifest.list" -o "$TMP_LIST"
+    echo "Descargando manifest.list..."
+    curl -fsSL \
+        "$REPO_URL/manifest.list" \
+        -o "$SCRIPTS_DIR/manifest.list"
     while IFS='|' read -r TYPE FILE MENU DESC; do
         [[ -z "$TYPE" || "$TYPE" =~ ^# ]] && continue
         echo "Descargando $FILE..."
@@ -39,7 +41,7 @@ update_project() {
     echo "Proyecto actualizado correctamente."
 }
 
-if [[ ! -f "$SCRIPTS_DIR/infra.conf" || ! -f "$SCRIPTS_DIR/lib.sh" ]]; then
+if [[ ! -f "$SCRIPTS_DIR/manifest.list" ]]; then
     echo "Primera ejecución. Descargando archivos del proyecto..."
     update_project
 fi
@@ -71,7 +73,7 @@ while IFS='|' read -r TYPE FILE MENU DESC; do
 
     SCRIPTS["$MENU"]="$FILE|$DESC"
 
-done < "$SCRIPTS_DIR/project.list"
+done < "$SCRIPTS_DIR/manifest.list"
 
 while true; do
 
