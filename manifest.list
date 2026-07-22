@@ -1,6 +1,6 @@
 # Tipo|Ruta|Menú|Descripción
 
-META|SETUP_VERSION|0.2d
+META|SETUP_VERSION|0.2e
 
 CORE|infra.conf||
 CORE|lib.sh||
