@@ -4,7 +4,8 @@ set -e
 source /scripts/infra.conf
 source /scripts/lib.sh
 
-CTID=$CT_CLOUDFRLARED
+# Los CT o VM de Conexión tendrán rango ID 190-199
+CTID=$CT_CLOUDFLARED
 VARS_FILE="/usr/local/community-scripts/defaults/cloudflared.vars"
 
 echo "Creando archivo vars..."
