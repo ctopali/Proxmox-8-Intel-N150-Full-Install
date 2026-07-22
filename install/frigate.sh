@@ -16,7 +16,16 @@ echo
 echo "Instalación del servicio Frigate:"
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/frigate.sh)"
 
+CTID=get_ctid_by_hostname frigate
 
-pct set 102 -mp0 /frigate_mirror,mp=/frigate_mirror
+pct stop $CTID
+pct set $CTID -mp0 /mnt/frigate,mp=/media/frigate
+pct start $CTID
+pct exec $CTID ls -lah /media/frigate
 
+if ! touch /media/frigate/recordings/prueba then
+  
 # Modificación del archivo yaml de configuración de Frigate:
+cat pct $CTID config.yaml < EOF
+
+EOF
