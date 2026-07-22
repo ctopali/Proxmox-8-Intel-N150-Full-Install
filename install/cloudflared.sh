@@ -4,7 +4,8 @@ set -e
 source /scripts/infra.conf
 source /scripts/lib.sh
 
-CTID="$CT_CLOUDFLARED"
+# Importante que no esté tomado el CTID 121
+CTID=121
 VARS_FILE="/usr/local/community-scripts/defaults/cloudflared.vars"
 
 echo "Creando archivo vars..."
