@@ -1,0 +1,15 @@
+# Tipo|Ruta|Menú|Descripción
+
+CORE|setup_full.sh||
+CORE|infra.conf||
+CORE|lib.sh||
+
+MENU|setup/setup_sensors.sh|1|Instalar sensores y drivers IT87
+MENU|setup/setup_disks.sh|2|Instala y modifica disco ZFS 'frigate_mirror'
+
+MENU|install/install_haos.sh|3|Instalar Home Assistant OS (VM)
+MENU|install/install_adguard.sh|4|Instalar AdGuard Home (LXC)
+MENU|install/install_cloudflared.sh|5|Instalar Cloudflared (LXC)
+MENU|install/install_frigate.sh|6|Instalar Frigate (LXC)
+
+MENU|setup/setup_startup.sh|9|Ordena el orden de inicio de LXC y VMs
