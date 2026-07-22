@@ -35,6 +35,11 @@ update_project() {
     echo "Proyecto actualizado correctamente."
 }
 
+if [[ ! -f "$SCRIPTS_DIR/infra.conf" || ! -f "$SCRIPTS_DIR/lib.sh" ]]; then
+    echo "Primera ejecución. Descargando archivos del proyecto..."
+    update_project
+fi
+
 if [[ "$LOCAL_SETUP_VERSION" != "$REMOTE_SETUP_VERSION" ]]; then
     echo
     read -rp "Hay una nueva versión disponible ($REMOTE_SETUP_VERSION). ¿Actualizar el proyecto completo? [y/N]: " RESP
@@ -42,14 +47,14 @@ if [[ "$LOCAL_SETUP_VERSION" != "$REMOTE_SETUP_VERSION" ]]; then
         update_project
         echo
         echo "Reiniciando instalador..."
-        exec "$SCRIPTS_DIR/setup_full.sh"
+        exec bash "$SCRIPTS_DIR/setup_full.sh"
     fi
 fi
 
 echo "--- Cargando configuración ---"
 
-source /scripts/infra.conf
-source /scripts/lib.sh
+source "$SCRIPTS_DIR/infra.conf"
+source "$SCRIPTS_DIR/lib.sh"
 
 check_infra
 
