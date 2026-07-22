@@ -16,4 +16,7 @@ echo
 echo "Instalación del servicio Frigate:"
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/frigate.sh)"
 
+
+pct set 102 -mp0 /frigate_mirror,mp=/frigate_mirror
+
 # Modificación del archivo yaml de configuración de Frigate:
