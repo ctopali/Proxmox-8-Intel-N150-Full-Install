@@ -3,6 +3,9 @@ set -euo pipefail
 
 POOL="frigate_mirror"
 MOUNT="/mnt/frigate"
+# Aquí limitamos la cuota de del disco mirror
+# 95 significa que se usará sólo hasta el 95% de la capacidad del disco
+CUOTA=95
 
 echo "========================================"
 echo " Revisando discos"
@@ -97,7 +100,7 @@ fi
 
 echo
 echo "========================================"
-echo " Dejando quota del Disco en 95%"
+echo " Dejando quota del Disco en $CUOTA%"
 echo "========================================"
 
 set_zfs_quota_percent_total() {
@@ -127,7 +130,7 @@ set_zfs_quota_percent_total() {
     echo "Nueva cuota ${PERCENT}%: $(numfmt --to=iec "$QUOTA_BYTES")"
 
 
-    if [[ "$CURRENT_QUOTA" != "none" && "$CURRENT_QUOTA" -gt "$QUOTA_BYTES" ]]; then
+    if [[ "$CURRENT_QUOTA" =~ ^[0-9]+$ ]] && [[ "$CURRENT_QUOTA" -gt "$QUOTA_BYTES" ]]; then
         echo "Existe una cuota mayor configurada."
         echo "No se modifica."
         return 0
@@ -142,7 +145,10 @@ set_zfs_quota_percent_total() {
     zfs get quota "$DATASET"
 }
 
-set_zfs_quota_percent_total frigate_mirror 95
+set_zfs_quota_percent_total frigate_mirror $CUOTA
+
+echo "Check de la Cuota que quedó en $CUOTA%:"
+zfs get quota frigate_mirror
 
 echo
 echo "========================================"
