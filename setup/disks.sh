@@ -95,6 +95,49 @@ if zfs list -H -o name "${POOL}/recordings" >/dev/null 2>&1; then
     zfs set recordsize=1M "${POOL}/recordings"
 fi
 
+set_zfs_quota_percent_total() {
+
+    local DATASET="$1"
+    local PERCENT="${2:-95}"
+
+    local POOL
+    POOL=$(zfs list -H -o name "$DATASET" | cut -d/ -f1)
+
+
+    local SIZE_BYTES
+    SIZE_BYTES=$(zpool get -Hp -o value size "$POOL")
+
+
+    local QUOTA_BYTES
+    QUOTA_BYTES=$(( SIZE_BYTES * PERCENT / 100 ))
+
+
+    local CURRENT_QUOTA
+    CURRENT_QUOTA=$(zfs get -Hp -o value quota "$DATASET")
+
+
+    echo
+    echo "Pool: $POOL"
+    echo "Tamaño total: $(numfmt --to=iec "$SIZE_BYTES")"
+    echo "Nueva cuota ${PERCENT}%: $(numfmt --to=iec "$QUOTA_BYTES")"
+
+
+    if [[ "$CURRENT_QUOTA" != "none" && "$CURRENT_QUOTA" -gt "$QUOTA_BYTES" ]]; then
+        echo "Existe una cuota mayor configurada."
+        echo "No se modifica."
+        return 0
+    fi
+
+
+    zfs set quota="${QUOTA_BYTES}" "$DATASET"
+
+
+    echo
+    echo "Quota aplicada:"
+    zfs get quota "$DATASET"
+}
+
+set_zfs_quota_percent_total frigate_mirror 95
 echo
 echo "========================================"
 echo " Permisos Frigate LXC"
