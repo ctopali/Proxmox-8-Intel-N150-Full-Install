@@ -1,6 +1,5 @@
 # Tipo|Ruta|Menú|Descripción
 
-CORE|setup_full.sh||
 CORE|infra.conf||
 CORE|lib.sh||
 
