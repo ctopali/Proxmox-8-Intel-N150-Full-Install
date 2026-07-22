@@ -4,54 +4,99 @@ set -e
 source /scripts/infra.conf
 source /scripts/lib.sh
 
-CTID="7"
+CTID="101"
 
-echo "Creando archivo vars: ---"
-#           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
+echo "Creando archivo vars..."
+
+#           APP          HOSTNAME       IP                  CPU RAM DISK TUN GPU NEST
 create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 
-# Instalacion de Debian 13 limpia:
-create_lxc_from_vars $CTID /usr/local/community-scripts/defaults/cloudflared.vars
+echo "Instalando Debian 13 limpio..."
 
-pct set $CTID --onboot 1
-echo "A continuación debe aparecer: onboot: 1"
-pct config $CTID
-pct start $CTID
+create_lxc_from_vars \
+    "$CTID" \
+    /usr/local/community-scripts/defaults/cloudflared.vars
 
-pct exec $CTID -- bash -c '
-# Add cloudflare gpg key
+
+pct set "$CTID" --onboot 1
+
+echo
+echo "Configuración del contenedor:"
+pct config "$CTID"
+
+
+pct start "$CTID"
+
+
+echo
+echo "Instalando Cloudflared..."
+
+pct exec "$CTID" -- bash -c '
+
+set -e
+
 mkdir -p --mode=0755 /usr/share/keyrings
-curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg \
- | tee /usr/share/keyrings/cloudflare-public-v2.gpg >/dev/null
 
-# Add this repo to your apt repositories
+curl -fsSL \
+https://pkg.cloudflare.com/cloudflare-public-v2.gpg \
+| tee /usr/share/keyrings/cloudflare-public-v2.gpg >/dev/null
+
+
 echo "deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main" \
- > /etc/apt/sources.list.d/cloudflared.list
+> /etc/apt/sources.list.d/cloudflared.list
 
-# install cloudflared
+
 apt update
 apt install -y cloudflared
+
 '
 
-# Leemos el input del usuario
+
 echo
-echo "Copiar el token del tunel entrando en Cloudflare.com -> Login -> Zero Trust -> Networks -> Tunnels & Mesh "\
-"-> Seleccionar el tunel -> Add a Connector -> Select OS Debian & 64-bit -> Copy 2 text box"
-echo "Pega el comando copiado desde Cloudflare Zero Trust:"
+echo "================================================"
+echo "Configuración del túnel Cloudflare"
+echo "================================================"
+
+echo
+echo "Entre en:"
+echo
+echo "Cloudflare Zero Trust"
+echo " -> Networks"
+echo " -> Tunnels"
+echo " -> Seleccionar túnel"
+echo " -> Add a Connector"
+echo " -> Debian 64-bit"
+echo
+echo "Copie el comando completo mostrado por Cloudflare."
+echo
+
+
 read -rp "> " INPUT
 
-# Extraer el último argumento (el token)
+
 TOKEN=$(awk '{print $NF}' <<< "$INPUT")
 
-# Validar longitud mínima
+
 if [[ ${#TOKEN} -lt 60 ]]; then
+
     echo
-    echo "ERROR: No parece ser un token válido."
-    echo "Token detectado: $TOKEN"
-    echo "Longitud: ${#TOKEN} caracteres."
+    echo "ERROR: El token no parece válido."
+    echo "Longitud detectada: ${#TOKEN}"
     exit 1
+
 fi
 
-echo "Token aparentemente válido detectado (${#TOKEN} caracteres)."
 
-pct exec $CTID -- cloudflared service install "$TOKEN"
+echo
+echo "Token válido detectado (${#TOKEN} caracteres)."
+
+
+pct exec "$CTID" -- \
+cloudflared service install "$TOKEN"
+
+
+echo
+echo "=============================================="
+echo "Cloudflared instalado correctamente."
+echo "=============================================="
+echo
