@@ -7,7 +7,7 @@ source /scripts/lib.sh
 echo "Creando archivo vars: ---"
 #           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
 echo "Creación del archivo frigate.vars..."
-create_vars "Frigate" "frigate" "debian" "13" "$FRIGATE_IP" 4 4096 32 yes yes 1
+create_vars "Frigate" "frigate" "debian" "12" "$FRIGATE_IP" 4 4096 32 yes yes 1
 
 echo "A continuación se ejecutará la instalación Helper-Script de"
 echo "Frigate, por favor, selecciona no compartir user data"
