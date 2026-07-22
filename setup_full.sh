@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+SETUP_VERSION="0.1b"
+
 SCRIPTS_DIR="/scripts"
 REPO_URL="https://raw.githubusercontent.com/ctopali/Proxmox-8-Intel-N150-Full-Install/refs/heads/main"
 
