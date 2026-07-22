@@ -63,6 +63,8 @@ update_project() {
             echo
             echo "ERROR: No fue posible descargar '$FILE'."
             echo "El proyecto quedó incompleto."
+            echo
+            echo "¡¡IMPORTANTE!!
             echo "Hable con el admin del script y pidale que"
             echo "Corrija el archivo manifest.list del repositorio."
             echo "Una vez resuelto vuelva a ejecutar el instalador."
