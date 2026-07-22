@@ -5,6 +5,7 @@ source /scripts/infra.conf
 source /scripts/lib.sh
 
 CTID="$CT_CLOUDFLARED"
+VARS_FILE="/usr/local/community-scripts/defaults/cloudflared.vars"
 
 echo "Creando archivo vars..."
 
@@ -13,10 +14,7 @@ create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 
 
 echo "Instalando Debian 13 limpio..."
 
-create_lxc_from_vars \
-    "$CTID" \
-    /usr/local/community-scripts/defaults/cloudflared.vars
-
+create_lxc_from_vars "$CTID" "$VARS_FILE"
 
 pct set "$CTID" --onboot 1
 
@@ -24,9 +22,7 @@ echo
 echo "Configuración del contenedor:"
 pct config "$CTID"
 
-
 pct start "$CTID"
-
 
 echo
 echo "Instalando Cloudflared..."
@@ -48,7 +44,6 @@ echo "deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.c
 
 apt update
 apt install -y cloudflared
-
 '
 
 
