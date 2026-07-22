@@ -31,11 +31,16 @@ pct exec "$CTID" -- bash -c '
 
 set -e
 
-mkdir -p --mode=0755 /usr/share/keyrings
+apt update
+apt install -y curl ca-certificates gnupg
+
+mkdir -p /usr/share/keyrings
 
 curl -fsSL \
 https://pkg.cloudflare.com/cloudflare-public-v2.gpg \
-| tee /usr/share/keyrings/cloudflare-public-v2.gpg >/dev/null
+-o /usr/share/keyrings/cloudflare-public-v2.gpg
+
+chmod 644 /usr/share/keyrings/cloudflare-public-v2.gpg
 
 
 echo "deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main" \
