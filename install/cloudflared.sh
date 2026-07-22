@@ -11,9 +11,9 @@ VARS_FILE="/usr/local/community-scripts/defaults/cloudflared.vars"
 echo "Creando archivo vars..."
 
 #           APP          HOSTNAME       IP                  CPU RAM DISK TUN GPU NEST
-create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
+create_vars "Cloudflared" "cloudflared" "debian" "12" "$CLOUDFLARED_IP" 1 512 4 yes no 0
 
-echo "Instalando Debian 13 limpio..."
+echo "Instalando Debian 12 limpio..."
 
 create_lxc_from_vars "$CTID" "$VARS_FILE"
 
@@ -41,6 +41,11 @@ curl -fsSL \
 https://pkg.cloudflare.com/cloudflare-public-v2.gpg \
 -o /usr/share/keyrings/cloudflare-public-v2.gpg
 
+if [[ ! -s /usr/share/keyrings/cloudflare-public-v2.gpg ]]; then
+    echo "ERROR: No se pudo descargar la llave GPG de Cloudflare"
+    exit 1
+fi
+
 chmod 644 /usr/share/keyrings/cloudflare-public-v2.gpg
 
 
@@ -52,6 +57,7 @@ apt update
 apt install -y cloudflared
 '
 
+pct exec "$CTID" -- cloudflared --version
 
 echo
 echo "================================================"
@@ -95,6 +101,7 @@ echo "Token válido detectado (${#TOKEN} caracteres)."
 pct exec "$CTID" -- \
 cloudflared service install "$TOKEN"
 
+pct exec "$CTID" -- systemctl status cloudflared --no-pager
 
 echo
 echo "=============================================="
