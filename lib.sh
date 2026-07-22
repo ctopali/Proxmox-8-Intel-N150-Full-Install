@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# version
-LIB_VERSION="0.1"
-
 inst-script() {
     local SCRIPT="$1"
     local PREGUNTA="$2"
