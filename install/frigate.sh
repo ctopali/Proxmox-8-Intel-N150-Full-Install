@@ -9,6 +9,10 @@ echo "Creando archivo vars: ---"
 echo "Creación del archivo frigate.vars..."
 create_vars "Frigate" "frigate" "debian" "13" "$FRIGATE_IP" 4 4096 32 yes yes 1
 
+echo "A continuación se ejecutará la instalación Helper-Script de"
+echo "Adguard Home, por favor, selecciona no compartir user data"
+echo "y también selecciona en template 'App Defaults ...'."
+echo
 echo "Instalación del servicio Frigate:"
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/frigate.sh)"
 
