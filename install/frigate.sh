@@ -10,7 +10,7 @@ echo "Creando archivo vars: ---"
 create_vars "Frigate" "frigate" "debian" "12" "$FRIGATE_IP" 4 4096 32 yes yes 1 0
 
 echo "A continuación se ejecutará la instalación Helper-Script de"
-echo "Adguard Home, por favor, selecciona no compartir user data"
+echo "Frigate, por favor, selecciona no compartir user data"
 echo "y también selecciona en template 'App Defaults ...'."
 echo
 echo "Instalando Frigate Helper Script..."
@@ -29,28 +29,40 @@ echo
 
 pct stop "$CTID"
 
+
+echo "Aplicando permisos..."
+
+chown -R 0:0 /mnt/frigate
+chmod -R 775 /mnt/frigate
+
+
+echo "Configurando mount point..."
+
+if pct config "$CTID" | grep -q "^mp0:"; then
+    pct set "$CTID" -delete mp0
+fi
+
+
 pct set "$CTID" -mp0 /mnt/frigate,mp=/media/frigate
 
-chown -R 100000:100000 /mnt/frigate
-chmod -R 775 /mnt/frigate
 
 pct start "$CTID"
 
 
 echo
-echo "Probando escritura en frigate_mirror"
+echo "Probando escritura..."
 echo
 
 
 if pct exec "$CTID" -- touch /media/frigate/recordings/test; then
 
-    echo "OK: Frigate puede escribir en frigate_mirror"
+    echo "OK: Frigate puede escribir"
 
     pct exec "$CTID" -- rm /media/frigate/recordings/test
 
 else
 
-    echo "ERROR: Frigate no puede escribir en frigate_mirror"
+    echo "ERROR: No puede escribir"
     exit 1
 
 fi
@@ -177,6 +189,7 @@ echo
 
 pct exec "$CTID" -- systemctl restart frigate
 
+pct exec "$CTID" -- systemctl status frigate --no-pager
 
 echo
 echo "======================================"
