@@ -90,9 +90,9 @@ ffmpeg:
   hwaccel_args: auto
 
 detectors:
-  detector01:
+  ov:
     type: openvino
-    device: AUTO
+    device: GPU
 
 detect:
   enabled: true
