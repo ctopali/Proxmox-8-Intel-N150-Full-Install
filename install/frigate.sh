@@ -7,7 +7,7 @@ source /scripts/lib.sh
 
 echo "Creando archivo vars: ---"
 
-create_vars "Frigate" "frigate" "debian" "12" "$FRIGATE_IP" 4 4096 32 yes yes 1
+create_vars "Frigate" "frigate" "debian" "12" "$FRIGATE_IP" 4 4096 32 yes yes 1 0
 
 echo "A continuación se ejecutará la instalación Helper-Script de"
 echo "Adguard Home, por favor, selecciona no compartir user data"
