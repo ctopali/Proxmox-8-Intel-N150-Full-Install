@@ -160,7 +160,7 @@ echo "========================================"
 # LXC 102 unprivileged:
 # root del contenedor = UID/GID 100000 en el host
 chown -R 0:0 "${MOUNT}"
-chmod -R 755 "${MOUNT}"
+chmod -R 775 "${MOUNT}"
 
 echo
 echo "========================================"
