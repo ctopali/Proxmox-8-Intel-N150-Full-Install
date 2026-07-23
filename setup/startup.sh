@@ -15,7 +15,7 @@ pct set 101 --onboot 1 --startup order=10
 qm set 100 --onboot 1 --startup order=20,up=10
 
 # Frigate
-pct set 103 --onboot 1 --startup order=30,up=10
+pct set 102 --onboot 1 --startup order=30,up=10
 
 # Túnel Cloudflare (al final para que todos tengan su IP)
-pct set 102 --onboot 1 --startup order=100
+pct set 191 --onboot 1 --startup order=100
