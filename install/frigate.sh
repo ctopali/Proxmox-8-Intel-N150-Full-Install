@@ -83,27 +83,22 @@ fi
 
 
 cat > "$CONFIG" <<EOF
-
 mqtt:
   enabled: false
 
 ffmpeg:
   hwaccel_args: auto
 
-
 detectors:
   detector01:
     type: openvino
     device: AUTO
 
-
 detect:
   enabled: true
 
-
 record:
   enabled: false
-
 
 objects:
   track:
@@ -112,34 +107,24 @@ objects:
     - dog
     - cat
 
-
 go2rtc:
   streams:
-
     exterior_main:
       - "rtsp://admin:123456@192.168.1.30:554/stream1"
-
     exterior_sub:
       - "rtsp://admin:123456@192.168.1.30:554/stream2"
 
-
     patio1_main:
       - "rtsp://admin:123456@192.168.1.31:554/stream1"
-
     patio1_sub:
       - "rtsp://admin:123456@192.168.1.31:554/stream2"
 
-
     patio2_main:
       - "rtsp://admin:123456@192.168.1.32:554/stream1"
-
     patio2_sub:
       - "rtsp://admin:123456@192.168.1.32:554/stream2"
 
-
-
 cameras:
-
   exterior:
     enabled: true
     ffmpeg:
@@ -147,8 +132,6 @@ cameras:
         - path: rtsp://127.0.0.1:8554/exterior_sub
           roles:
             - detect
-
-
   patio1:
     enabled: true
     ffmpeg:
@@ -156,8 +139,6 @@ cameras:
         - path: rtsp://127.0.0.1:8554/patio1_sub
           roles:
             - detect
-
-
   patio2:
     enabled: true
     ffmpeg:
@@ -165,8 +146,6 @@ cameras:
         - path: rtsp://127.0.0.1:8554/patio2_sub
           roles:
             - detect
-
-
 
 model:
   width: 300
@@ -176,9 +155,7 @@ model:
   path: /openvino-model/ssdlite_mobilenet_v2.xml
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 
-
 version: 0.17-0
-
 EOF
 '
 
