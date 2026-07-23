@@ -31,6 +31,9 @@ pct stop "$CTID"
 
 pct set "$CTID" -mp0 /mnt/frigate,mp=/media/frigate
 
+chown -R 100000:100000 /mnt/frigate
+chmod -R 775 /mnt/frigate
+
 pct start "$CTID"
 
 
