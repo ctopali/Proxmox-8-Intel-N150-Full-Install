@@ -159,7 +159,7 @@ echo "========================================"
 # alguno aparte del root) y pueda escribir en el pool
 # LXC 102 unprivileged:
 # root del contenedor = UID/GID 100000 en el host
-chown -R 100000:100000 "${MOUNT}"
+chown -R root:root "${MOUNT}"
 chmod -R 755 "${MOUNT}"
 
 echo
