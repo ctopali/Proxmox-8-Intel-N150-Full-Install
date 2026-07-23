@@ -70,6 +70,7 @@ create_vars() {
     local TUN="$9"
     local GPU="${10}"
     local NEST="${11}"
+    local UNPRIV="${12:-1}"#Lo hace no obligatorio y con valor 1 por defecto
 
     # Validación de parámetros obligatorios
     local PARAMS=(
@@ -109,7 +110,7 @@ create_vars() {
 
 var_os=$OS
 var_version=$OSV
-var_unprivileged=1
+var_unprivileged=$UNPRIV
 var_cpu=$CPU
 var_ram=$RAM
 var_disk=$DISK
