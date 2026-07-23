@@ -70,7 +70,7 @@ create_vars() {
     local TUN="$9"
     local GPU="${10}"
     local NEST="${11}"
-    local UNPRIV="${12:-1}"#Lo hace no obligatorio y con valor 1 por defecto
+    local UNPRIV="${12:-1}" #Lo hace no obligatorio y con valor 1 por defecto
 
     # Validación de parámetros obligatorios
     local PARAMS=(
