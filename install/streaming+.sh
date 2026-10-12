@@ -6,7 +6,6 @@ source /scripts/lib.sh
 
 # ID del contenedor
 CTID=150
-VARS_FILE="/usr/local/community-scripts/defaults/streaming+.vars"
 
 echo "Creando archivo vars..."
 
