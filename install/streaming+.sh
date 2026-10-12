@@ -13,7 +13,7 @@ VARS_FILE="/usr/local/community-scripts/defaults/cloudflared.vars"
 echo "Creando archivo vars..."
 
 #           APP          HOSTNAME       IP                  CPU RAM DISK TUN GPU NEST
-create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
+create_vars "Streaming+" "streaming+" "debian" "13" "$STREAMING+_IP" 1 512 4 yes no 0
 
 echo "Verificando que el LXC ID $CTID está Libre."
 if pct status "$CTID" &>/dev/null; then
