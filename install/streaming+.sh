@@ -1,19 +1,18 @@
-#!/bin/bash
-
 #!/usr/bin/env bash
 set -e
 
 source /scripts/infra.conf
 source /scripts/lib.sh
 
-# Los CT o VM de Conexión tendrán rango ID 190-199
-CTID=$CT_CLOUDFLARED
-VARS_FILE="/usr/local/community-scripts/defaults/cloudflared.vars"
+# ID del contenedor
+CTID=150
+VARS_FILE="/usr/local/community-scripts/defaults/streaming+.vars"
 
 echo "Creando archivo vars..."
 
-#           APP          HOSTNAME       IP                  CPU RAM DISK TUN GPU NEST
-create_vars "Streaming+" "streaming+" "debian" "13" "$STREAMING+_IP" 1 512 4 yes no 0
+# Sintaxis de la librería ctopali:
+# create_vars "APP" "HOSTNAME" "OS" "VERSION" "IP" "CPU" "RAM" "DISK" "TUN" "GPU" "NEST"
+create_vars "Streaming+" "streaming+" "debian" "13" "$STREAMING+_IP" 2 4096 16 yes yes 0
 
 echo "Verificando que el LXC ID $CTID está Libre."
 if pct status "$CTID" &>/dev/null; then
@@ -21,9 +20,24 @@ if pct status "$CTID" &>/dev/null; then
     exit 1
 fi
 
-echo "Instalando Debian 13 limpio..."
+# --- CONFIGURACIÓN DEL ZFS COMPARTIDO ---
+# Asegura que exista la estructura de carpetas en el ZFS del host (ajusta 'datos' si tu ZFS se llama diferente)
+ZFS_POOL="datos" # Cambia esto por el nombre de tu ZFS si es distinto (ej. tank, pool, etc.)
+STREAMING_PATH="/$ZFS_POOL/Streaming"
 
+echo "Configurando directorios en el ZFS Compartido ($STREAMING_PATH)..."
+mkdir -p "$STREAMING_PATH/media/movies"
+mkdir -p "$STREAMING_PATH/media/tvshows"
+mkdir -p "$STREAMING_PATH/downloads/completed"
+mkdir -p "$STREAMING_PATH/downloads/incomplete"
+
+echo "Instalando Debian 13 limpio..."
 create_lxc_from_vars "$CTID" "$VARS_FILE"
+
+# --- AÑADIR PUNTO DE MONTAJE (BIND MOUNT) DESDE EL ZFS AL LXC ---
+# Esto monta /datos/Streaming del host dentro del LXC en /mnt/storage
+echo "Añadiendo ZFS Compartido al contenedor LXC..."
+pct set "$CTID" -mp0 "$STREAMING_PATH,mp=/mnt/storage"
 
 pct set "$CTID" --onboot 1
 
@@ -40,31 +54,32 @@ until pct exec "$CTID" -- hostname &>/dev/null; do
 done
 
 echo
-echo "Instalando Jellyfin, qBittorrent, radarr, sonarr, prowlarr..."
+echo "Instalando Jellyfin, qBittorrent, Radarr, Sonarr, Prowlarr..."
 
 pct exec "$CTID" -- bash -c '
+set -e
 
 # 1. Actualizar el sistema e instalar prerrequisitos
+export DEBIAN_FRONTEND=noninteractive
 apt update && apt upgrade -y
 apt install -y curl apt-transport-https ca-certificates gnupg lsb-release git
 
 # 2. Instalar Docker y Docker Compose
 install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
 
 echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 apt update
 apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-# 3. Crear directorios de configuración y multimedia
+# 3. Crear directorios de configuración de las apps apuntando al almacenamiento montado (/mnt/storage)
 mkdir -p /opt/media-server/{jellyfin,qbittorrent,radarr,sonarr,prowlarr}
-mkdir -p /mnt/storage/media /mnt/storage/downloads
 
-# 4. Crear archivo Docker Compose
+# 4. Crear archivo Docker Compose usando las rutas del ZFS montado
 cat <<EOF > /opt/media-server/docker-compose.yml
 version: "3.8"
 
@@ -150,4 +165,5 @@ EOF
 cd /opt/media-server
 docker compose up -d
 
-echo "¡Instalación completada con éxito!"
+echo "¡Instalación completada con éxito y enlazado al ZFS Compartido!"
+'
