@@ -1,5 +1,49 @@
 #!/bin/bash
 
+#!/usr/bin/env bash
+set -e
+
+source /scripts/infra.conf
+source /scripts/lib.sh
+
+# Los CT o VM de Conexión tendrán rango ID 190-199
+CTID=$CT_CLOUDFLARED
+VARS_FILE="/usr/local/community-scripts/defaults/cloudflared.vars"
+
+echo "Creando archivo vars..."
+
+#           APP          HOSTNAME       IP                  CPU RAM DISK TUN GPU NEST
+create_vars "Cloudflared" "cloudflared" "debian" "13" "$CLOUDFLARED_IP" 1 512 4 yes no 0
+
+echo "Verificando que el LXC ID $CTID está Libre."
+if pct status "$CTID" &>/dev/null; then
+    echo "El CT $CTID ya existe."
+    exit 1
+fi
+
+echo "Instalando Debian 13 limpio..."
+
+create_lxc_from_vars "$CTID" "$VARS_FILE"
+
+pct set "$CTID" --onboot 1
+
+echo
+echo "Configuración del contenedor:"
+pct config "$CTID"
+
+pct start "$CTID"
+
+echo "Esperando inicio del contenedor..."
+
+until pct exec "$CTID" -- hostname &>/dev/null; do
+    sleep 2
+done
+
+echo
+echo "Instalando Jellyfin, qBittorrent, radarr, sonarr, prowlarr..."
+
+pct exec "$CTID" -- bash -c '
+
 # 1. Actualizar el sistema e instalar prerrequisitos
 apt update && apt upgrade -y
 apt install -y curl apt-transport-https ca-certificates gnupg lsb-release git
