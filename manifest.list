@@ -8,11 +8,11 @@ CORE|lib.sh||
 MENU|setup/sensors_it87.sh|1|Instalar sensores y drivers IT87
 MENU|setup/disks.sh|2|Instala y modifica disco ZFS 'frigate_mirror'
 
-MENU|install/haos.sh|3|Instalar Home Assistant OS (VM)
-MENU|install/adguard.sh|4|Instalar AdGuard Home (LXC)
-MENU|install/cloudflared.sh|5|Instalar Cloudflared (LXC)
-MENU|install/frigate.sh|6|Instalar Frigate (LXC)
-MENU|install/streaming.sh|7|Instalar Jellyfin, qBittorrent y más (streaming server) (LXC)
+MENU|install/cloudflared.sh|11|Instalar Cloudflared (LXC)
+MENU|install/adguard.sh|12|Instalar AdGuard Home (LXC)
+MENU|install/haos.sh|21|Instalar Home Assistant OS (VM)
+MENU|install/frigate.sh|31|Instalar Frigate (LXC)
+MENU|install/streaming.sh|51|Instalar Jellyfin, qBittorrent y más (streaming server) (LXC)
 
 MENU|setup/check_services.sh|91|Check y muestreo de las IPs y Puertos de los servicios del servidor.
 MENU|setup/startup.sh|92|Ordena el orden de inicio de LXC y VMs
