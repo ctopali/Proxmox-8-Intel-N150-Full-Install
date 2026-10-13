@@ -187,30 +187,5 @@ zfs get recordsize "${POOL}/recordings"
 
 echo
 echo "========================================"
-echo " Configuración de ZFS Datos"
-echo "========================================"
-
-# Preguntar al usuario si desea crear/configurar el mountpoint
-read -p "¿Deseas configurar el mountpoint de datos? (y/N): " answer
-
-if [[ "$answer" =~ ^[yY]$ ]]; then
-    POOL="datos"
-    MOUNT="/mnt/datos"
-
-    if zfs list "$POOL" &>/dev/null; then
-        echo "Configurando el mountpoint para $POOL en $MOUNT..."
-        zfs set mountpoint="${MOUNT}" "${POOL}"
-        
-        echo "Verificación exitosa:"
-        zfs get mountpoint "${POOL}"
-    else
-        echo "El pool/dataset '$POOL' no existe."
-    fi
-else
-    echo "Operación cancelada."
-fi
-
-echo
-echo "========================================"
 echo " Finalizado"
 echo "========================================"
