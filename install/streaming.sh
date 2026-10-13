@@ -21,12 +21,12 @@ fi
 
 # --- CONFIGURACIÓN DEL ZFS COMPARTIDO ---
 # Asegura que exista la estructura de carpetas en el ZFS del host (ajusta 'datos' si tu ZFS se llama diferente)
-ZFS_POOL="datos" # Cambia esto por el nombre de tu ZFS si es distinto (ej. tank, pool, etc.)
-STREAMING_PATH="/$ZFS_POOL/streaming"
+ZFS_MOUNT="/mnt/datos" # Cambia esto por el nombre de tu ZFS si es distinto (ej. tank, pool, etc.)
+STREAMING_PATH="$ZFS_MOUNT/streaming"
 
 echo "Configurando directorios en el ZFS Compartido ($STREAMING_PATH)..."
 mkdir -p "$STREAMING_PATH/media/movies"
-mkdir -p "$STREAMING_PATH/media/tvshows"
+mkdir -p "$STREAMING_PATH/media/series"
 mkdir -p "$STREAMING_PATH/downloads/completed"
 mkdir -p "$STREAMING_PATH/downloads/incomplete"
 
@@ -36,7 +36,19 @@ create_lxc_from_vars "$CTID" "$VARS_FILE"
 # --- AÑADIR PUNTO DE MONTAJE (BIND MOUNT) DESDE EL ZFS AL LXC ---
 # Esto monta /datos/Streaming del host dentro del LXC en /mnt/storage
 echo "Añadiendo ZFS Compartido al contenedor LXC..."
-pct set "$CTID" -mp0 "$STREAMING_PATH,mp=/mnt/storage"
+echo "Aplicando permisos..."
+
+chown -R 0:0 "$ZFS_MOUNT"
+chmod -R 775 "$ZFS_MOUNT"
+
+echo "Configurando mount point..."
+
+if pct config "$CTID" | grep -q "^mp0:"; then
+    pct set "$CTID" -delete mp0
+fi
+
+
+pct set "$CTID" -mp0 $STREAMING_PATH,mp=/mnt/storage
 
 pct set "$CTID" --onboot 1
 
@@ -75,13 +87,11 @@ echo \
 apt update
 apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-# 3. Crear directorios de configuración de las apps apuntando al almacenamiento montado (/mnt/storage)
+# 3. Crear directorios de configuración de las apps
 mkdir -p /opt/media-server/{jellyfin,qbittorrent,radarr,sonarr,prowlarr}
 
-# 4. Crear archivo Docker Compose usando las rutas del ZFS montado
+# 4. Crear archivo Docker Compose usando las rutas correctas hacia /mnt/storage
 cat <<EOF > /opt/media-server/docker-compose.yml
-version: "3.8"
-
 services:
   jellyfin:
     image: linuxserver/jellyfin
@@ -164,5 +174,5 @@ EOF
 cd /opt/media-server
 docker compose up -d
 '
+
 echo "¡Instalación completada con éxito y enlazado al ZFS Compartido!"
-'
