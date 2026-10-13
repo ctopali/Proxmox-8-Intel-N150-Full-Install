@@ -130,7 +130,7 @@ run_local_setup() {
     if [[ "$SCRIPT_PATH" != "$SCRIPTS_DIR/setup_full.sh" ]] && [[ -f "$SCRIPTS_DIR/setup_full.sh" ]]; then
 
         echo
-        echo "Ejecutando instalador local..."
+        echo "Ejecutando instalador local (Versión: $CURRENT_VERSION)..."
         exec bash "$SCRIPTS_DIR/setup_full.sh"
 
     fi
