@@ -14,6 +14,5 @@ MENU|install/cloudflared.sh|5|Instalar Cloudflared (LXC)
 MENU|install/frigate.sh|6|Instalar Frigate (LXC)
 MENU|install/streaming.sh|7|Instalar Jellyfin, qBittorrent y más (streaming server) (LXC)
 
-
-MENU|setup/check_services.sh|8|Check y muestreo de las IPs y Puertos de los servicios del servidor.
-MENU|setup/startup.sh|9|Ordena el orden de inicio de LXC y VMs
+MENU|setup/check_services.sh|91|Check y muestreo de las IPs y Puertos de los servicios del servidor.
+MENU|setup/startup.sh|92|Ordena el orden de inicio de LXC y VMs
