@@ -6,7 +6,7 @@ SUBNET="192.168.1"
 echo "=================================================================================================="
 echo "       AUDITORÍA DE SERVICIOS EN PROXMOX (Rango: $SUBNET.0 - $SUBNET.40)                          "
 echo "=================================================================================================="
-printf "%-16s | %-15s | %-8s | %-40s | %s\n" "SERVICIO" "IP" "PUERTO" "DESCRIPCIÓN" "ESTADO"
+printf "%-16s | %-15s | %-8s | %-8s | %s\n" "SERVICIO" "IP" "PUERTO" "ESTADO" "DESCRIPCIÓN"
 echo "--------------------------------------------------------------------------------------------------"
 
 SERVICES=(
@@ -27,28 +27,32 @@ for i in $(seq 0 40); do
     ip="$SUBNET.$i"
     
     if ping -c 1 -W 1 "$ip" &>/dev/null; then
-        for svc in "${SERVICES[@]}"; do
+        for svc in "${SERVICES[@]}"
             name="${svc%%:*}"
             rest="${svc#*:}"
             port="${rest%%:*}"
             desc="${rest#*:}"
 
             if [ "$port" -eq 0 ]; then
-                if pct list | grep -q "$ip" || qm list | grep -q "$ip"; then
-                    printf "%-16s | %-15s | %-8s | %-40s | %s\n" "$name" "$ip" "N/A" "$desc" "[ACTIVO (Contenedor)]"
-                fi
+                # Cloudflared se maneja aparte al final
+                continue
             else
                 if nc -z -w 1 "$ip" "$port" &>/dev/null; then
-                    printf "%-16s | %-15s | %-8s | %-40s | %s\n" "$name" "$ip" "$port" "$desc" "[OK]"
+                    status="UP"
+                else
+                    status="DOWN"
                 fi
+                printf "%-16s | %-15s | %-8s | %-8s | %s\n" "$name" "$ip" "$port" "$status" "$desc"
             fi
         done
     fi
 done
 
-# Comprobación directa para Cloudflared (buscando si el CT está corriendo)
+# Comprobación directa para Cloudflared
 if pct status "$CT_CLOUDFLARED" 2>/dev/null | grep -q "running"; then
     cf_ip=$(pct exec "$CT_CLOUDFLARED" -- hostname -I 2>/dev/null | awk '{print $1}')
-    printf "%-16s | %-15s | %-8s | %-40s | %s\n" "Cloudflared" "${cf_ip:-N/A}" "N/A" "Túnel seguro Cloudflare (Sin puerto local)" "[ACTIVO]"
+    printf "%-16s | %-15s | %-8s | %-8s | %s\n" "Cloudflared" "${cf_ip:-N/A}" "N/A" "UP" "Túnel seguro Cloudflare (Sin puerto local)"
+else
+    printf "%-16s | %-15s | %-8s | %-8s | %s\n" "Cloudflared" "N/A" "N/A" "DOWN" "Túnel seguro Cloudflare (Sin puerto local)"
 fi
-echo "=================================================================================="
+echo "=================================================================================================="
