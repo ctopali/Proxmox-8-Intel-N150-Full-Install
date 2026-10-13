@@ -129,8 +129,12 @@ run_local_setup() {
 
     if [[ "$SCRIPT_PATH" != "$SCRIPTS_DIR/setup_full.sh" ]] && [[ -f "$SCRIPTS_DIR/setup_full.sh" ]]; then
 
+        CURRENT_VERSION=$(get_manifest_version "$MANIFEST_LOCAL" 2>/dev/null || echo "Desconocida")
+
         echo
         echo "Ejecutando instalador local (Versión: $CURRENT_VERSION)..."
+        echo
+
         exec bash "$SCRIPTS_DIR/setup_full.sh"
 
     fi
