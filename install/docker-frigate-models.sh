@@ -5,7 +5,7 @@ source /scripts/infra.conf
 source /scripts/lib.sh
 
 echo "Creando archivo vars: ---"
-#           APP       HOSTNAME  IP           CPU RAM DISK TUN GPU NEST
+#           APP                     HOSTNAME                OS       VER  IP         CPU RAM DISK TUN GPU NEST UNPRIV
 create_vars "docker-frigate-models" "docker-frigate-models" "debian" "13" "$DOCKER_IP" 2 2048 20 yes no 0
 
 echo "A continuación se ejecutará la instalación Helper-Script de"
