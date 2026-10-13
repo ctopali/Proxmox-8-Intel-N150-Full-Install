@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
+source /scripts/infra.conf
 SUBNET="192.168.1"
 
-echo "=================================================================================="
-echo "       AUDITORÍA DE SERVICIOS EN PROXMOX (Rango: $SUBNET.0 - $SUBNET.40)          "
-echo "=================================================================================="
-printf "%-18s | %-15s | %-8s | %-30s | %s\n" "SERVICIO" "IP" "PUERTO" "DESCRIPCIÓN" "ESTADO"
-echo "----------------------------------------------------------------------------------"
+echo "=================================================================================================="
+echo "       AUDITORÍA DE SERVICIOS EN PROXMOX (Rango: $SUBNET.0 - $SUBNET.40)                          "
+echo "=================================================================================================="
+printf "%-16s | %-15s | %-8s | %-40s | %s\n" "SERVICIO" "IP" "PUERTO" "DESCRIPCIÓN" "ESTADO"
+echo "--------------------------------------------------------------------------------------------------"
 
 SERVICES=(
     "AdGuard DNS:53:Servidor DNS y Bloqueo de publicidad"
@@ -34,14 +35,20 @@ for i in $(seq 0 40); do
 
             if [ "$port" -eq 0 ]; then
                 if pct list | grep -q "$ip" || qm list | grep -q "$ip"; then
-                    printf "%-18s | %-15s | %-8s | %-30s | %s\n" "$name" "$ip" "N/A" "$desc" "[ACTIVO (Contenedor)]"
+                    printf "%-16s | %-15s | %-8s | %-40s | %s\n" "$name" "$ip" "N/A" "$desc" "[ACTIVO (Contenedor)]"
                 fi
             else
                 if nc -z -w 1 "$ip" "$port" &>/dev/null; then
-                    printf "%-18s | %-15s | %-8s | %-30s | %s\n" "$name" "$ip" "$port" "$desc" "[OK]"
+                    printf "%-16s | %-15s | %-8s | %-40s | %s\n" "$name" "$ip" "$port" "$desc" "[OK]"
                 fi
             fi
         done
     fi
 done
+
+# Comprobación directa para Cloudflared (buscando si el CT está corriendo)
+if pct status "$CT_CLOUDFLARED" 2>/dev/null | grep -q "running"; then
+    cf_ip=$(pct exec "$CT_CLOUDFLARED" -- hostname -I 2>/dev/null | awk '{print $1}')
+    printf "%-16s | %-15s | %-8s | %-40s | %s\n" "Cloudflared" "${cf_ip:-N/A}" "N/A" "Túnel seguro Cloudflare (Sin puerto local)" "[ACTIVO]"
+fi
 echo "=================================================================================="
