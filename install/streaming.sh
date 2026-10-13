@@ -13,6 +13,9 @@ echo "Creando archivo vars..."
 # create_vars "APP" "HOSTNAME" "OS" "VERSION" "IP" "CPU" "RAM" "DISK" "TUN" "GPU" "NEST"
 create_vars "Streaming" "streaming" "debian" "13" "$STREAMING_IP" 2 4096 16 yes yes 0
 
+# DEFINIR EXPLÍCITAMENTE LA RUTA DEL ARCHIVO DE VARIABLES CREADO
+VARS_FILE="/usr/local/community-scripts/defaults/streaming.vars"
+
 echo "Verificando que el LXC ID $CTID está Libre."
 if pct status "$CTID" &>/dev/null; then
     echo "El CT $CTID ya existe."
