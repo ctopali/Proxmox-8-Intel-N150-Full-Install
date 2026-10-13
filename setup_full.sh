@@ -160,9 +160,9 @@ menu_loop() {
     while true; do
 
         echo
-        echo "======================================"
-        echo "       INSTALADOR PROXMOX"
-        echo "======================================"
+        echo "======================================="
+        echo "       INSTALADOR PROXMOX v$CURRENT_VERSION"
+        echo "======================================="
 
         for i in $(printf "%s\n" "${!SCRIPTS[@]}" | sort -n); do
 
@@ -221,6 +221,8 @@ menu_loop() {
 ensure_project
 
 check_updates
+
+CURRENT_VERSION=$(get_manifest_version "$MANIFEST_LOCAL" 2>/dev/null || echo "1.0")
 
 run_local_setup
 
