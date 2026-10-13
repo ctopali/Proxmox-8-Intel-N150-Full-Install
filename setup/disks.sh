@@ -5,8 +5,8 @@ POOL="frigate_mirror"
 MOUNT="/mnt/frigate"
 # Aquí limitamos la cuota de del disco mirror
 # 80 significa que se usará sólo hasta el 80% de la capacidad del disco
-# 80 es lo recomendado para usarlo en frigate.
-CUOTA=80
+# 80 es lo recomendado para usarlo en frigate. Pero lo dejare en 85
+CUOTA=85
 
 echo "========================================"
 echo " Revisando discos"
