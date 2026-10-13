@@ -20,8 +20,24 @@ if pct status "$CTID" &>/dev/null; then
 fi
 
 # --- CONFIGURACIÓN DEL ZFS COMPARTIDO ---
-# Asegura que exista la estructura de carpetas en el ZFS del host (ajusta 'datos' si tu ZFS se llama diferente)
-ZFS_MOUNT="/mnt/datos" # Cambia esto por el nombre de tu ZFS si es distinto (ej. tank, pool, etc.)
+POOL="datos"
+
+# 1. Verificar si existe /datos, /mnt/datos o si se puede configurar vía ZFS
+if [ -d "/datos" ]; then
+    ZFS_MOUNT="/datos"
+    echo "Se encontró el directorio existente en $ZFS_MOUNT"
+elif [ -d "/mnt/datos" ]; then
+    ZFS_MOUNT="/mnt/datos"
+    echo "Se encontró el directorio existente en $ZFS_MOUNT"
+elif zfs list "$POOL" &>/dev/null; then
+    ZFS_MOUNT="/mnt/datos"
+    echo "Configurando el mountpoint para el pool ZFS $POOL en $ZFS_MOUNT..."
+    zfs set mountpoint="${ZFS_MOUNT}" "${POOL}"
+else
+    echo "Error: No se encuentra la carpeta '/datos', '/mnt/datos' ni el pool ZFS '$POOL'."
+    exit 1
+fi
+
 STREAMING_PATH="$ZFS_MOUNT/streaming"
 
 echo "Configurando directorios en el ZFS Compartido ($STREAMING_PATH)..."
@@ -30,86 +46,21 @@ mkdir -p "$STREAMING_PATH/media/series"
 mkdir -p "$STREAMING_PATH/downloads/completed"
 mkdir -p "$STREAMING_PATH/downloads/incomplete"
 
+echo "Aplicando permisos específicos a streaming..."
+chown -R 0:0 "$STREAMING_PATH"
+chmod -R 775 "$STREAMING_PATH"
+
 echo "Instalando Debian 13 limpio..."
 create_lxc_from_vars "$CTID" "$VARS_FILE"
 
-
-echo
-echo "========================================"
-echo " Configuración de ZFS Datos y LXC Bind Mount"
-echo "========================================"
-
-# Preguntar al usuario si desea configurar el mountpoint y el LXC
-read -p "¿Deseas configurar el mountpoint de datos y enlazar streaming al LXC? (y/N): " answer
-
-if [[ "$answer" =~ ^[yY]$ ]]; then
-    POOL="datos"
-    
-    # 1. Verificar si existe /datos, /mnt/datos o si se puede configurar vía ZFS
-    if [ -d "/datos" ]; then
-        MOUNT="/datos"
-        echo "Se encontró el directorio existente en $MOUNT"
-    elif [ -d "/mnt/datos" ]; then
-        MOUNT="/mnt/datos"
-        echo "Se encontró el directorio existente en $MOUNT"
-    elif zfs list "$POOL" &>/dev/null; then
-        MOUNT="/mnt/datos"
-        echo "Configurando el mountpoint para el pool ZFS $POOL en $MOUNT..."
-        zfs set mountpoint="${MOUNT}" "${POOL}"
-    else
-        echo "Error: No se encuentra la carpeta '/datos', '/mnt/datos' ni el pool ZFS '$POOL'."
-        exit 1
-    fi
-
-    # 2. Definir la ruta de streaming y asegurar que exista
-    STREAMING_PATH="${MOUNT}/streaming"
-    if [ ! -d "$STREAMING_PATH" ]; then
-        echo "Creando la subcarpeta streaming en $STREAMING_PATH..."
-        mkdir -p "$STREAMING_PATH"
-    else
-        echo "La subcarpeta streaming ya existe en $STREAMING_PATH"
-    fi
-
-    # 3. Solicitar el ID del LXC recién creado
-    read -p "Introduce el ID del contenedor LXC donde deseas montar streaming: " lxc_id
-
-    # 4. Validar el LXC y aplicar el Bind Mount
-    if [ -n "$lxc_id" ] && pct status "$lxc_id" &>/dev/null; then
-        echo "Añadiendo el punto de montaje al LXC $lxc_id..."
-        
-        # Usamos mp0 (puedes cambiarlo si ya usas mp0 en ese LXC)
-        pct set "$lxc_id" -mp0 "$STREAMING_PATH,mp=/mnt/streaming"
-        
-        echo "========================================"
-        echo " ¡Configuración completada con éxito!"
-        echo " Ruta en Host: $STREAMING_PATH"
-        echo " Montado en LXC $lxc_id: /mnt/streaming"
-        echo "========================================"
-        echo "Nota: Si el LXC está encendido, reinícialo para aplicar los cambios (pct reboot $lxc_id)"
-    else
-        echo "Error: El ID del LXC '$lxc_id' no es válido o no existe en este nodo."
-    fi
-else
-    echo "Operación cancelada."
-fi
-
 # --- AÑADIR PUNTO DE MONTAJE (BIND MOUNT) DESDE EL ZFS AL LXC ---
-# Esto monta /datos/Streaming del host dentro del LXC en /mnt/storage
 echo "Añadiendo ZFS Compartido al contenedor LXC..."
-echo "Aplicando permisos..."
-
-chown -R 0:0 "$ZFS_MOUNT"
-chmod -R 775 "$ZFS_MOUNT"
-
-echo "Configurando mount point..."
 
 if pct config "$CTID" | grep -q "^mp0:"; then
     pct set "$CTID" -delete mp0
 fi
 
-
-pct set "$CTID" -mp0 $STREAMING_PATH,mp=/mnt/storage
-
+pct set "$CTID" -mp0 "$STREAMING_PATH,mp=/mnt/streaming"
 pct set "$CTID" --onboot 1
 
 echo
@@ -150,7 +101,7 @@ apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 # 3. Crear directorios de configuración de las apps
 mkdir -p /opt/media-server/{jellyfin,qbittorrent,radarr,sonarr,prowlarr}
 
-# 4. Crear archivo Docker Compose usando las rutas correctas hacia /mnt/storage
+# 4. Crear archivo Docker Compose usando las rutas actualizadas hacia /mnt/streaming
 cat <<EOF > /opt/media-server/docker-compose.yml
 services:
   jellyfin:
@@ -164,7 +115,7 @@ services:
       - /dev/dri/renderD128:/dev/dri/renderD128
     volumes:
       - ./jellyfin:/config
-      - /mnt/storage/media:/data
+      - /mnt/streaming/media:/data
     ports:
       - 8096:8096
     restart: unless-stopped
@@ -179,7 +130,7 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - ./qbittorrent:/config
-      - /mnt/storage/downloads:/downloads
+      - /mnt/streaming/downloads:/downloads
     ports:
       - 8080:8080
       - 6881:6881
@@ -195,8 +146,8 @@ services:
       - TZ=America/Santiago
     volumes:
       - ./radarr:/config
-      - /mnt/storage/media:/data
-      - /mnt/storage/downloads:/downloads
+      - /mnt/streaming/media:/data
+      - /mnt/streaming/downloads:/downloads
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -210,8 +161,8 @@ services:
       - TZ=America/Santiago
     volumes:
       - ./sonarr:/config
-      - /mnt/storage/media:/data
-      - /mnt/storage/downloads:/downloads
+      - /mnt/streaming/media:/data
+      - /mnt/streaming/downloads:/downloads
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -235,4 +186,4 @@ cd /opt/media-server
 docker compose up -d
 '
 
-echo "¡Instalación completada con éxito y enlazado al ZFS Compartido!"
+echo "¡Instalación completada con éxito y enlazado al ZFS Compartido en /mnt/streaming!"
