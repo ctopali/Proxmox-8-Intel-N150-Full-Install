@@ -11,7 +11,7 @@ echo "Creando archivo vars..."
 
 # Sintaxis de la librería ctopali:
 # create_vars "APP" "HOSTNAME" "OS" "VERSION" "IP" "CPU" "RAM" "DISK" "TUN" "GPU" "NEST"
-create_vars "Streaming+" "streaming+" "debian" "13" "$STREAMING+_IP" 2 4096 16 yes yes 0
+create_vars "Streaming" "streaming" "debian" "13" "$STREAMING_IP" 2 4096 16 yes yes 0
 
 echo "Verificando que el LXC ID $CTID está Libre."
 if pct status "$CTID" &>/dev/null; then
