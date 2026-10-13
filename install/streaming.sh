@@ -22,7 +22,7 @@ fi
 # --- CONFIGURACIÓN DEL ZFS COMPARTIDO ---
 # Asegura que exista la estructura de carpetas en el ZFS del host (ajusta 'datos' si tu ZFS se llama diferente)
 ZFS_POOL="datos" # Cambia esto por el nombre de tu ZFS si es distinto (ej. tank, pool, etc.)
-STREAMING_PATH="/$ZFS_POOL/Streaming"
+STREAMING_PATH="/$ZFS_POOL/streaming"
 
 echo "Configurando directorios en el ZFS Compartido ($STREAMING_PATH)..."
 mkdir -p "$STREAMING_PATH/media/movies"
@@ -163,6 +163,6 @@ EOF
 # 5. Levantar los servicios
 cd /opt/media-server
 docker compose up -d
-
+'
 echo "¡Instalación completada con éxito y enlazado al ZFS Compartido!"
 '
