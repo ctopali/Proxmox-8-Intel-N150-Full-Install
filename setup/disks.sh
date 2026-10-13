@@ -130,12 +130,12 @@ set_zfs_quota_percent_total() {
     echo "Tamaño total: $(numfmt --to=iec "$SIZE_BYTES")"
     echo "Nueva cuota ${PERCENT}%: $(numfmt --to=iec "$QUOTA_BYTES")"
 
-
-    if [[ "$CURRENT_QUOTA" =~ ^[0-9]+$ ]] && [[ "$CURRENT_QUOTA" -gt "$QUOTA_BYTES" ]]; then
-        echo "Existe una cuota mayor configurada."
-        echo "No se modifica."
-        return 0
-    fi
+    # Comentada el check de mantener cuota si la nueva es menor a la anterior
+    #if [[ "$CURRENT_QUOTA" =~ ^[0-9]+$ ]] && [[ "$CURRENT_QUOTA" -gt "$QUOTA_BYTES" ]]; then
+    #    echo "Existe una cuota mayor configurada."
+    #    echo "No se modifica."
+    #    return 0
+    #fi
 
 
     zfs set quota="${QUOTA_BYTES}" "$DATASET"
