@@ -4,17 +4,15 @@ set -e
 source /scripts/infra.conf
 source /scripts/lib.sh
 
-# ID del contenedor
-CTID=150
+# ID del contenedor y VARS FILE (config del CT o VM)
+CTID=$CT_STREAMING
+VARS_FILE="/usr/local/community-scripts/defaults/streaming.vars"
 
 echo "Creando archivo vars..."
 
 # Sintaxis de la librería ctopali:
 # create_vars "APP" "HOSTNAME" "OS" "VERSION" "IP" "CPU" "RAM" "DISK" "TUN" "GPU" "NEST"
 create_vars "Streaming" "streaming" "debian" "13" "$STREAMING_IP" 2 4096 16 yes yes 0
-
-# DEFINIR EXPLÍCITAMENTE LA RUTA DEL ARCHIVO DE VARIABLES CREADO
-VARS_FILE="/usr/local/community-scripts/defaults/streaming.vars"
 
 echo "Verificando que el LXC ID $CTID está Libre."
 if pct status "$CTID" &>/dev/null; then
