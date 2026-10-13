@@ -33,6 +33,66 @@ mkdir -p "$STREAMING_PATH/downloads/incomplete"
 echo "Instalando Debian 13 limpio..."
 create_lxc_from_vars "$CTID" "$VARS_FILE"
 
+
+echo
+echo "========================================"
+echo " Configuración de ZFS Datos y LXC Bind Mount"
+echo "========================================"
+
+# Preguntar al usuario si desea configurar el mountpoint y el LXC
+read -p "¿Deseas configurar el mountpoint de datos y enlazar streaming al LXC? (y/N): " answer
+
+if [[ "$answer" =~ ^[yY]$ ]]; then
+    POOL="datos"
+    
+    # 1. Verificar si existe /datos, /mnt/datos o si se puede configurar vía ZFS
+    if [ -d "/datos" ]; then
+        MOUNT="/datos"
+        echo "Se encontró el directorio existente en $MOUNT"
+    elif [ -d "/mnt/datos" ]; then
+        MOUNT="/mnt/datos"
+        echo "Se encontró el directorio existente en $MOUNT"
+    elif zfs list "$POOL" &>/dev/null; then
+        MOUNT="/mnt/datos"
+        echo "Configurando el mountpoint para el pool ZFS $POOL en $MOUNT..."
+        zfs set mountpoint="${MOUNT}" "${POOL}"
+    else
+        echo "Error: No se encuentra la carpeta '/datos', '/mnt/datos' ni el pool ZFS '$POOL'."
+        exit 1
+    fi
+
+    # 2. Definir la ruta de streaming y asegurar que exista
+    STREAMING_PATH="${MOUNT}/streaming"
+    if [ ! -d "$STREAMING_PATH" ]; then
+        echo "Creando la subcarpeta streaming en $STREAMING_PATH..."
+        mkdir -p "$STREAMING_PATH"
+    else
+        echo "La subcarpeta streaming ya existe en $STREAMING_PATH"
+    fi
+
+    # 3. Solicitar el ID del LXC recién creado
+    read -p "Introduce el ID del contenedor LXC donde deseas montar streaming: " lxc_id
+
+    # 4. Validar el LXC y aplicar el Bind Mount
+    if [ -n "$lxc_id" ] && pct status "$lxc_id" &>/dev/null; then
+        echo "Añadiendo el punto de montaje al LXC $lxc_id..."
+        
+        # Usamos mp0 (puedes cambiarlo si ya usas mp0 en ese LXC)
+        pct set "$lxc_id" -mp0 "$STREAMING_PATH,mp=/mnt/streaming"
+        
+        echo "========================================"
+        echo " ¡Configuración completada con éxito!"
+        echo " Ruta en Host: $STREAMING_PATH"
+        echo " Montado en LXC $lxc_id: /mnt/streaming"
+        echo "========================================"
+        echo "Nota: Si el LXC está encendido, reinícialo para aplicar los cambios (pct reboot $lxc_id)"
+    else
+        echo "Error: El ID del LXC '$lxc_id' no es válido o no existe en este nodo."
+    fi
+else
+    echo "Operación cancelada."
+fi
+
 # --- AÑADIR PUNTO DE MONTAJE (BIND MOUNT) DESDE EL ZFS AL LXC ---
 # Esto monta /datos/Streaming del host dentro del LXC en /mnt/storage
 echo "Añadiendo ZFS Compartido al contenedor LXC..."
