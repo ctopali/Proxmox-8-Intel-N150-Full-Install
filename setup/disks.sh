@@ -4,8 +4,9 @@ set -euo pipefail
 POOL="frigate_mirror"
 MOUNT="/mnt/frigate"
 # Aquí limitamos la cuota de del disco mirror
-# 95 significa que se usará sólo hasta el 95% de la capacidad del disco
-CUOTA=95
+# 80 significa que se usará sólo hasta el 80% de la capacidad del disco
+# 80 es lo recomendado para usarlo en frigate.
+CUOTA=80
 
 echo "========================================"
 echo " Revisando discos"
