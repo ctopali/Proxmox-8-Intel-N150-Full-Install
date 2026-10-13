@@ -54,6 +54,17 @@ chmod -R 775 "$STREAMING_PATH"
 echo "Instalando Debian 13 limpio..."
 create_lxc_from_vars "$CTID" "$VARS_FILE"
 
+# --- CONFIGURACIÓN DE GPU PASSTHROUGH (Intel QuickSync) ---
+echo "Configurando passthrough de GPU para Jellyfin..."
+echo "lxc.cgroup2.devices.allow: c 226:128 rwm" >> "/etc/pve/lxc/$CTID.conf"
+echo "lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file" >> "/etc/pve/lxc/$CTID.conf"
+if [ "$(tail -n 1 /etc/pve/lxc/$CTID.conf)" = "lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file" ]; then
+    echo "Configuración de la GPU aplicada correctamente."
+else
+    echo "Error al aplicar la configuración de la GPU."
+    exit 1
+fi
+
 # --- AÑADIR PUNTO DE MONTAJE (BIND MOUNT) DESDE EL ZFS AL LXC ---
 echo "Añadiendo ZFS Compartido al contenedor LXC..."
 
@@ -185,6 +196,20 @@ EOF
 # 5. Levantar los servicios
 cd /opt/media-server
 docker compose up -d
+'
+
+echo "Verificando servicios desplegados..."
+sleep 5
+
+pct exec "$CTID" -- bash -c '
+echo "Comprobando puertos en el contenedor..."
+for port in 8096 8080 7878 8989 9696; do
+    if ss -tulpn | grep -q ":$port "; then
+        echo "Puerto $port: OK (En servicio)"
+    else
+        echo "Puerto $port: ERROR (No responde)"
+    fi
+done
 '
 
 echo "¡Instalación completada con éxito y enlazado al ZFS Compartido en /mnt/streaming!"
