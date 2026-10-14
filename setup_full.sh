@@ -129,12 +129,8 @@ run_local_setup() {
 
     if [[ "$SCRIPT_PATH" != "$SCRIPTS_DIR/setup_full.sh" ]] && [[ -f "$SCRIPTS_DIR/setup_full.sh" ]]; then
 
-        CURRENT_VERSION=$(get_manifest_version "$MANIFEST_LOCAL" 2>/dev/null || echo "Desconocida")
-
         echo
-        echo "Ejecutando instalador local (Versión: $CURRENT_VERSION)..."
-        echo
-
+        echo "Ejecutando instalador local..."
         exec bash "$SCRIPTS_DIR/setup_full.sh"
 
     fi
@@ -160,9 +156,9 @@ menu_loop() {
     while true; do
 
         echo
-        echo "======================================="
-        echo "       INSTALADOR PROXMOX v$CURRENT_VERSION"
-        echo "======================================="
+        echo "======================================"
+        echo "       INSTALADOR PROXMOX"
+        echo "======================================"
 
         for i in $(printf "%s\n" "${!SCRIPTS[@]}" | sort -n); do
 
@@ -221,8 +217,6 @@ menu_loop() {
 ensure_project
 
 check_updates
-
-CURRENT_VERSION=$(get_manifest_version "$MANIFEST_LOCAL" 2>/dev/null || echo "1.0")
 
 run_local_setup
 
